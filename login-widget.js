@@ -72,9 +72,6 @@ Login.prototype.render = function(parent,nextSibling) {
   domNode.appendChild(logoutbutton)
 
   var loginState = this.wiki.getTiddlerText('$:/state/OokTech/Login');
-  if (typeof loginState === 'undefined') {
-    console.log('yep')
-  }
   if (loginState === 'true' || this.name !== undefined) {
     passNode.disabled = true;
     userNode.disabled = true;
@@ -106,7 +103,6 @@ Login.prototype.execute = function() {
 	this.url = this.getAttribute('url', '/authenticate');
 	this.cookieName = this.getAttribute('cookieName', 'token');
   this.localstorageKey = this.getAttribute('localstorageKey', 'ws-token');
-
   var token = localStorage.getItem(this.localstorageKey);
   this.name = undefined;
   if (token) {
