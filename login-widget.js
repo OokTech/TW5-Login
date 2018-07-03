@@ -83,7 +83,7 @@ Login.prototype.render = function(parent,nextSibling) {
 
   var loginState = this.wiki.getTiddlerText('$:/state/OokTech/Login');
   if (loginState === 'true' || this.name !== undefined) {
-    this.setLoggedIn()
+    $tw.wiki.setText('$:/state/OokTech/Login', 'text', null, 'true');
     if (this.guestLogin) {
       guest.disabled = true;
     }
@@ -98,7 +98,7 @@ Login.prototype.render = function(parent,nextSibling) {
     if (this.guestLogin) {
       guest.disabled = false;
     }
-    this.setLoggedOut()
+    $tw.wiki.setText('$:/state/OokTech/Login', 'text', null, 'false');
     passNode.disabled = false;
     userNode.disabled = false;
     statusDiv.innerHTML =  'Logged Out'
