@@ -71,8 +71,21 @@ Login.prototype.render = function(parent,nextSibling) {
   logoutbutton.addEventListener('click', function (event) {self.logout();})
   domNode.appendChild(logoutbutton)
 
+  if (this.guestLogin) {
+    var guest = this.document.createElement('input')
+    guest.setAttribute('type', 'button')
+    guest.setAttribute('value', 'Login as Guest')
+    guest.setAttribute('id', 'guestLoginButton')
+    guest.addEventListener('click', function (event) {self.loginGuest();})
+    domNode.appendChild(this.document.createElement('br'))
+    domNode.appendChild(guest)
+  }
+
   var loginState = this.wiki.getTiddlerText('$:/state/OokTech/Login');
   if (loginState === 'true' || this.name !== undefined) {
+    if (this.guestLogin) {
+      guest.disabled = true;
+    }
     passNode.disabled = true;
     userNode.disabled = true;
     statusDiv.innerHTML =  'Logged in as ' + this.name;
@@ -81,6 +94,9 @@ Login.prototype.render = function(parent,nextSibling) {
     domNode.classList.add('loggedin')
     domNode.classList.remove('loggedout')
   } else {
+    if (this.guestLogin) {
+      guest.disabled = false;
+    }
     passNode.disabled = false;
     userNode.disabled = false;
     statusDiv.innerHTML =  'Logged Out'
@@ -103,12 +119,23 @@ Login.prototype.execute = function() {
 	this.url = this.getAttribute('url', '/authenticate');
 	this.cookieName = this.getAttribute('cookieName', 'token');
   this.localstorageKey = this.getAttribute('localstorageKey', 'ws-token');
+  this.guestLogin = this.getAttribute('guestLogin', 'false');
   var token = localStorage.getItem(this.localstorageKey);
   this.name = undefined;
   if (token) {
     this.name = JSON.parse(window.atob(token.split('.')[1])).name;
   }
 };
+
+/*
+  This does the normal login but it supplies the username and password 'Guest'
+  to allow one-click guest logins.
+*/
+Login.prototype.loginGuest = function () {
+  document.getElementById('usertext').value = 'Guest';
+  document.getElementById('pwdtext').value = 'Guest';
+  this.login();
+}
 
 /*
   This sends a POST with the name and password.
@@ -133,7 +160,7 @@ Login.prototype.login = function() {
         self.setLoggedOut()
       }
     }
-    name = document.getElementById('usertext').value
+    var name = document.getElementById('usertext').value
     var password = document.getElementById('pwdtext').value
     xhr.send(`name=${name}&pwd=${password}`)
   }

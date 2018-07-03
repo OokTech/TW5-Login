@@ -4,7 +4,7 @@ type: text/css
 
 .loggedin {
   border: solid 3px green;
-  background-color: #DDF;
+  #background-color: #DDF;
 }
 .loggedin #user input {
   background-color: darkgrey;
@@ -14,35 +14,35 @@ type: text/css
 }
 .loggedout {
   border: solid 3px red;
-  background-color: #FFD;
+  #background-color: #FFD;
 }
 .loginclass {
-max-width: 300px;
-text-align: center;
+  max-width: 300px;
+  text-align: center;
 }
 .loginclass #statusdiv {
-height: 1.2em;
-font-size: 2em;
-display: flex;
-align-items: center;
-justify-content: center;
+  height: 1.2em;
+  font-size: 2em;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 .loginclass #pwd {
-background-color: lightgrey;
-border: solid 1px black;
-height: 2.3em;
-vertical-align: middle;
+  #background-color: lightgrey;
+  #border: solid 1px black;
+  height: 2.3em;
+  vertical-align: middle;
 }
 .loginclass #pwd input {
-float: right;
-width: 12em;
+  float: right;
+  width: 12em;
 }
 .loginclass #user {
-border: solid 1px black;
-height: 2.3em;
-vertical-align: bottom;
+  #border: solid 1px black;
+  height: 2.3em;
+  vertical-align: bottom;
 }
 .loginclass #user input {
-float:right;
-width: 12em;
+  float:right;
+  width: 12em;
 }
