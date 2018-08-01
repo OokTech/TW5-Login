@@ -193,12 +193,8 @@ function getCookie(c_name) {
 Login.prototype.getLoginState = function () {
   var cookie = getCookie(this.cookieName);
   if (cookie) {
-    //$tw.wiki.setText('$:/state/OokTech/Login', 'text', null, 'true');
-    this.refreshSelf();
     return "true";
   } else {
-    //$tw.wiki.setText('$:/state/OokTech/Login', 'text', null, 'false');
-    this.refreshSelf();
     return "false";
   }
 }
