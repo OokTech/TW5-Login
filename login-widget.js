@@ -81,7 +81,7 @@ Login.prototype.render = function(parent,nextSibling) {
     domNode.appendChild(guest)
   }
 
-  var loginState = getLoginState();
+  var loginState = this.getLoginState();
 
   //var loginState = this.wiki.getTiddlerText('$:/state/OokTech/Login');
   if (loginState === 'true') {
@@ -196,11 +196,11 @@ Login.prototype.getLoginState = function () {
   if (cookie) {
     $tw.wiki.setText('$:/state/OokTech/Login', 'text', null, 'true');
     this.refreshSelf();
-    return true;
+    return "true";
   } else {
     $tw.wiki.setText('$:/state/OokTech/Login', 'text', null, 'false');
     this.refreshSelf();
-    return false;
+    return "false";
   }
 }
 
