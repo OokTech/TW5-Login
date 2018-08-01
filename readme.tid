@@ -1,0 +1,30 @@
+title: $:/plugins/OokTech/Login/readme
+
+!Login
+
+This plugin adds the `$login-widget`, which lets you login to servers that use
+token authentication. It sends (using an HTTPS POST) a username and password to
+a url and expects an access token in reply.
+
+When it receives the token it puts it into a cookie and stores it in browser
+localStorage to be used with websockets or other secure communication types
+that don't use cookies.
+
+|!Parameter |!Description |
+|!url |The url to send the POST to. Default: `/authenticate' |
+|!cookieName |The name of the cookie to store the received token in. Default: `token` |
+|!localstorageKey |The name of the localStorage key to store the token in. Default: `ws-token` |
+
+!!Usage
+
+```
+<$login-widget url='/authenticate' cookieName='token' localstorageKey='ws-token'/>
+```
+
+!!Notes
+
+The body of the POST is a string constructed as:
+
+`name=userName&pwd=password`
+
+where `userName` is the supplied name and `password` is the given password.

@@ -81,8 +81,10 @@ Login.prototype.render = function(parent,nextSibling) {
     domNode.appendChild(guest)
   }
 
-  var loginState = this.wiki.getTiddlerText('$:/state/OokTech/Login');
-  if (loginState === 'true' || this.name !== undefined) {
+  var loginState = getLoginState();
+
+  //var loginState = this.wiki.getTiddlerText('$:/state/OokTech/Login');
+  if (loginState === 'true') {
     $tw.wiki.setText('$:/state/OokTech/Login', 'text', null, 'true');
     if (this.guestLogin) {
       guest.disabled = true;
@@ -125,7 +127,11 @@ Login.prototype.execute = function() {
   var token = localStorage.getItem(this.localstorageKey);
   this.name = undefined;
   if (token) {
-    this.name = JSON.parse(window.atob(token.split('.')[1])).name;
+    try {
+      this.name = JSON.parse(window.atob(token.split('.')[1])).name;
+    } catch (e) {
+
+    }
   }
 };
 
@@ -157,14 +163,44 @@ Login.prototype.login = function() {
         var expires = new Date();
         expires.setTime(expires.getTime() + 24*60*60*1000)
         document.cookie = self.cookieName + '=' + this.responseText + '; expires=' + expires + '; path=/;'
-        self.setLoggedIn()
-      } else {
-        self.setLoggedOut()
-      }
+        //self.setLoggedIn()
+      }/* else {
+        //self.setLoggedOut()
+      }*/
+      self.getLoginState()
     }
     var name = document.getElementById('usertext').value
     var password = document.getElementById('pwdtext').value
     xhr.send(`name=${name}&pwd=${password}`)
+  }
+}
+
+function getCookie(c_name) {
+  var c_value = " " + document.cookie;
+  var c_start = c_value.indexOf(" " + c_name + "=");
+  if (c_start == -1) {
+    c_value = null;
+  } else {
+    c_start = c_value.indexOf("=", c_start) + 1;
+    var c_end = c_value.indexOf(";", c_start);
+    if (c_end == -1) {
+      c_end = c_value.length;
+    }
+    c_value = unescape(c_value.substring(c_start,c_end));
+  }
+  return c_value;
+}
+
+Login.prototype.getLoginState = function () {
+  var cookie = getCookie(this.cookieName);
+  if (cookie) {
+    $tw.wiki.setText('$:/state/OokTech/Login', 'text', null, 'true');
+    this.refreshSelf();
+    return true;
+  } else {
+    $tw.wiki.setText('$:/state/OokTech/Login', 'text', null, 'false');
+    this.refreshSelf();
+    return false;
   }
 }
 
