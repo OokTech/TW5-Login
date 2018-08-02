@@ -191,7 +191,7 @@ function getCookie(c_name) {
 
 Login.prototype.getLoginState = function () {
   if (this.token) {
-    if (this.token.exp > Date.now()) {
+    if (this.token.exp*1000 > Date.now()) {
       return "true";
     } else {
       return "false";
