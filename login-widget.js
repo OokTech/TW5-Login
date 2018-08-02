@@ -123,11 +123,12 @@ Login.prototype.execute = function() {
 	this.cookieName = this.getAttribute('cookieName', 'token');
   this.localstorageKey = this.getAttribute('localstorageKey', 'ws-token');
   this.guestLogin = this.getAttribute('guestLogin', 'false');
-  var token = localStorage.getItem(this.localstorageKey);
+  this.token = localStorage.getItem(this.localstorageKey);
   this.name = undefined;
-  if (token) {
+  if (this.token) {
     try {
       this.name = JSON.parse(window.atob(token.split('.')[1])).name;
+      this.expires = JSON.parse(window.atob(token.split('.')[1])).exp;
     } catch (e) {
 
     }
@@ -162,10 +163,10 @@ Login.prototype.login = function() {
         var expires = new Date();
         expires.setTime(expires.getTime() + 24*60*60*1000)
         document.cookie = self.cookieName + '=' + this.responseText + '; expires=' + expires + '; path=/;'
-        //self.setLoggedIn()
-      }/* else {
-        //self.setLoggedOut()
-      }*/
+        self.setLoggedIn()
+      } else {
+        self.setLoggedOut()
+      }
       self.getLoginState()
     }
     var name = document.getElementById('usertext').value
@@ -191,11 +192,12 @@ function getCookie(c_name) {
 }
 
 Login.prototype.getLoginState = function () {
-  var cookie = getCookie(this.cookieName);
-  if (cookie) {
-    return "true";
-  } else {
-    return "false";
+  if (this.token) {
+    if (this.token.exp > Date.now()) {
+      return "true";
+    } else {
+      return "false";
+    }
   }
 }
 
@@ -227,7 +229,7 @@ Refresh the widget by ensuring our attributes are up to date
 */
 Login.prototype.refresh = function(changedTiddlers) {
 	var changedAttributes = this.computeAttributes();
-	if(Object.keys(changedAttributes).length > 0) {
+	if(Object.keys(changedAttributes).length > 0 || (this.token.exp > Date.now())) {
 		this.refreshSelf();
 		return true;
 	}
