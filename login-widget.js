@@ -125,8 +125,8 @@ Login.prototype.execute = function() {
   this.name = undefined;
   if (this.token) {
     try {
-      this.name = JSON.parse(window.atob(token.split('.')[1])).name;
-      this.expires = JSON.parse(window.atob(token.split('.')[1])).exp;
+      this.name = JSON.parse(window.atob(this.token.split('.')[1])).name;
+      this.expires = JSON.parse(window.atob(this.token.split('.')[1])).exp;
     } catch (e) {
 
     }
@@ -159,6 +159,7 @@ Login.prototype.login = function() {
       if (this.responseText && this.status == "200") {
         localStorage.setItem(self.localstorageKey, this.responseText);
         this.token = this.responseText;
+        this.expires = JSON.parse(window.atob(this.token.split('.')[1])).exp;
         var expires = new Date();
         expires.setTime(expires.getTime() + 24*60*60*1000);
         document.cookie = self.cookieName + '=' + this.responseText + '; expires=' + expires + '; path=/;';
