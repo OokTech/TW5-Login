@@ -191,7 +191,7 @@ function getCookie(c_name) {
 
 Login.prototype.getLoginState = function () {
   if (this.token) {
-    if (this.token.exp*1000 > Date.now()) {
+    if (this.expires * 1000 > Date.now()) {
       return "true";
     } else {
       return "false";
@@ -227,7 +227,7 @@ Refresh the widget by ensuring our attributes are up to date
 */
 Login.prototype.refresh = function(changedTiddlers) {
 	var changedAttributes = this.computeAttributes();
-	if(Object.keys(changedAttributes).length > 0 || (this.token.exp > Date.now())) {
+	if(Object.keys(changedAttributes).length > 0 || (this.expires > Date.now())) {
 		this.refreshSelf();
 		return true;
 	}
