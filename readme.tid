@@ -46,3 +46,11 @@ The token is not your login credentials, it is a temporary and unforgable key
 that is only valid for 24 hours by default. Someone gaining access to an
 expired token does not put your account in danger. Someone gaining access to a
 valid token only gives them access until the token expires.
+
+!!Notes
+
+The body of the POST is a string constructed as:
+
+`name=userName&pwd=password`
+
+where `userName` is the supplied name and `password` is the given password.
