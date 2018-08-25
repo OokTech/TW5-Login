@@ -154,7 +154,10 @@ Login.prototype.loginGuest = function () {
 */
 Login.prototype.login = function() {
   var self = this;
-  if (window.location.protocol === 'https:') {
+  // We can only do this if the destination is https. So either we are on an
+  // https server and it is local (the url doesn't start with http) or we are
+  // sending to an https url
+  if ((window.location.protocol === 'https:' && (self.url.startsWith('https://') || !self.url.startsWith('http'))) || self.url.startsWith('https://')) {
     var xhr = new XMLHttpRequest();
     xhr.open('POST', self.url, true);
     xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
