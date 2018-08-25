@@ -41,14 +41,17 @@ Login.prototype.render = function(parent,nextSibling) {
   domNode.className='loginclass'
   var statusDiv = this.document.createElement('div')
   statusDiv.setAttribute('id', 'statusdiv')
-  domNode.appendChild(statusDiv);
+  domNode.appendChild(statusDiv)
+  var urlDiv = this.document.createElement('div')
+  domNode.appendChild(urlDiv)
+  urlDiv.innerHTML = 'on ' + this.url
   var userSpan = this.document.createElement('div');
   userSpan.appendChild(this.document.createTextNode('Name:'))
   var userNode = this.document.createElement("input")
   userNode.setAttribute('type', 'text')
   userNode.setAttribute('id', 'usertext')
-  userSpan.setAttribute('id', 'user');
-  userSpan.appendChild(userNode);
+  userSpan.setAttribute('id', 'user')
+  userSpan.appendChild(userNode)
   var passSpan = this.document.createElement('div');
   passSpan.appendChild(this.document.createTextNode('Password:'))
   var passNode = this.document.createElement("input")
@@ -81,8 +84,8 @@ Login.prototype.render = function(parent,nextSibling) {
     domNode.appendChild(guest)
   }
 
-  var loginState = this.wiki.getTiddlerText('$:/state/OokTech/Login');
-  if (loginState === 'true' || this.name !== undefined) {
+  var loginState = this.getLoginState();
+  if (loginState) {
     $tw.wiki.setText('$:/state/OokTech/Login', 'text', null, 'true');
     if (this.guestLogin) {
       guest.disabled = true;
@@ -119,13 +122,18 @@ Compute the internal state of the widget
 Login.prototype.execute = function() {
 	//Get widget attributes.
 	this.url = this.getAttribute('url', '/authenticate');
+  this.saveCookie = this.getAttribute('saveCookie', false);
 	this.cookieName = this.getAttribute('cookieName', 'token');
   this.localstorageKey = this.getAttribute('localstorageKey', 'ws-token');
   this.guestLogin = this.getAttribute('guestLogin', 'false');
   var token = localStorage.getItem(this.localstorageKey);
   this.name = undefined;
   if (token) {
-    this.name = JSON.parse(window.atob(token.split('.')[1])).name;
+    try {
+      this.name = JSON.parse(window.atob(token.split('.')[1])).name;
+    } catch (e) {
+
+    }
   }
 };
 
@@ -156,7 +164,9 @@ Login.prototype.login = function() {
         localStorage.setItem(self.localstorageKey, this.responseText)
         var expires = new Date();
         expires.setTime(expires.getTime() + 24*60*60*1000)
-        document.cookie = self.cookieName + '=' + this.responseText + '; expires=' + expires + '; path=/;'
+        if (self.saveCookie === true) {
+          document.cookie = self.cookieName + '=' + this.responseText + '; expires=' + expires + '; path=/;'
+        }
         self.setLoggedIn()
       } else {
         self.setLoggedOut()
@@ -166,6 +176,36 @@ Login.prototype.login = function() {
     var password = document.getElementById('pwdtext').value
     xhr.send(`name=${name}&pwd=${password}`)
   }
+}
+
+function getCookie(name) {
+  var value = " " + document.cookie;
+  var start = value.indexOf(" " + name + "=");
+  if (start == -1) {
+    value = null;
+  } else {
+    start = value.indexOf("=", start) + 1;
+    var end = value.indexOf(";", start);
+    if (end == -1) {
+      end = value.length;
+    }
+    value = unescape(value.substring(start,end));
+  }
+  return value;
+}
+
+Login.prototype.getLoginState = function () {
+  var token = localStorage.getItem(this.localstorageKey)
+  var exp = 0;
+  if (token) {
+    try {
+      exp = JSON.parse(atob(token.split('.')[1])).exp*1000;
+    } catch (e) {
+      // nothing here, if there is no cookie or it isn't what we want than just
+      // do nothign.
+    }
+  }
+  return (exp > Date.now());
 }
 
 Login.prototype.setLoggedIn = function () {

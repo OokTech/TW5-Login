@@ -1,0 +1,48 @@
+title: $:/plugins/OokTech/Login/readme
+
+!Login
+
+This plugin adds the `$login-widget`, which lets you login to servers that use
+token authentication. It sends (using an HTTP POST) a username and password to
+a url and expects an access token in reply.
+
+When it receives the token it puts it in browser localStorage to be used with
+websockets or other secure communication types that don't use cookies.
+
+If you have `saveCookie` set to true than it also saves the token in a cookie.
+You must have `saveCookie` set to true if you are logging into wikis to use
+them. If you are logging into a remote wiki to push or fetch tiddlers than
+`saveCookie` should be false.
+
+You can use this to maintain logins for multiple sites. This is useful if you
+login to a remote Bob server to push or pull tiddlers. In that case make sure
+to set `saveCookie` to false so that you don't send your access token to
+servers that don't need it.
+
+|!Parameter |!Description |
+|!url |The url to send the POST to. Default: `/authenticate' |
+|!cookieName |The name of the cookie to store the received token in. Default: `token` |
+|!localstorageKey |The name of the localStorage key to store the token in. Default: `ws-token` |
+|!saveCookie |This sets if the received access token should be saved in a cookie or not. Default: false |
+
+!!Usage
+
+```
+<$login-widget url='/authenticate' cookieName='token' localstorageKey='ws-token'/>
+```
+
+!!A Note About Cookies
+
+If you are logging into a wiki to use it normally, `saveCookie` should be
+`true`. If you are logging into a remote server to push or fetch tiddlers it
+should be `false` (the default value).
+
+If `saveCookie` is not false when you log into a remote server than your access
+token for that server is sent to the local one with every request also,
+potentially giving access to your login on the remote server until the token
+expires.
+
+The token is not your login credentials, it is a temporary and unforgable key
+that is only valid for 24 hours by default. Someone gaining access to an
+expired token does not put your account in danger. Someone gaining access to a
+valid token only gives them access until the token expires.

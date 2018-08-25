@@ -27,6 +27,13 @@ type: text/css
   align-items: center;
   justify-content: center;
 }
+.loginclass #loginurl {
+  height: 1.2em;
+  font-size: 1em;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
 .loginclass #pwd {
   #background-color: lightgrey;
   #border: solid 1px black;
