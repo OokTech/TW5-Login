@@ -169,7 +169,7 @@ Login.prototype.login = function() {
         this.expires = JSON.parse(window.atob(this.token.split('.')[1])).exp;
         var expires = new Date();
         expires.setTime(expires.getTime() + 24*60*60*1000)
-        if (self.saveCookie === true) {
+        if (self.saveCookie === 'true') {
           document.cookie = self.cookieName + '=' + this.responseText + '; expires=' + expires + '; path=/;'
         }
         self.setLoggedIn()
