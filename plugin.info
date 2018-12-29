@@ -2,7 +2,7 @@
   "title": "$:/plugins/OokTech/Login",
   "description": "A widget to login with a restful server",
   "author": "inmysocks",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "core-version": ">=5.1.8",
   "source": "",
   "plugin-type": "plugin",

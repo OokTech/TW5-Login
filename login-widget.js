@@ -125,6 +125,7 @@ Login.prototype.execute = function() {
 	this.cookieName = this.getAttribute('cookieName', 'token');
   this.localstorageKey = this.getAttribute('localstorageKey', 'ws-token');
   this.guestLogin = this.getAttribute('guestLogin', 'false');
+  this.bobLogin = this.getAttribute('bobLogin', 'true')
   this.token = localStorage.getItem(this.localstorageKey);
   this.name = undefined;
   if (this.token) {
@@ -165,14 +166,30 @@ Login.prototype.login = function() {
       // do something to response
       if (this.responseText && this.status == "200") {
         localStorage.setItem(self.localstorageKey, this.responseText);
-        this.token = this.responseText;
-        this.expires = JSON.parse(window.atob(this.token.split('.')[1])).exp;
+        //this.token = this.responseText;
+        self.token = this.responseText;
+        self.expires = JSON.parse(window.atob(self.token.split('.')[1])).exp;
         var expires = new Date();
         expires.setTime(expires.getTime() + 24*60*60*1000)
         if (self.saveCookie === 'true') {
           document.cookie = self.cookieName + '=' + this.responseText + '; expires=' + expires + '; path=/;'
         }
         self.setLoggedIn()
+        // take care of the Bob login things, if they exist
+        if (typeof this.bobLogin !== 'string') {
+          this.bobLogin = '';
+        }
+        if ($tw.Bob && this.bobLogin.toLowerCase() === 'true') {
+          if ($tw.Bob.Shared) {
+            if (typeof $tw.Bob.Shared.sendMessage === 'function') {
+              var token = this.token;//localStorage.getItem('ws-token');
+              var wikiName = $tw.wiki.getTiddlerText("$:/WikiName");
+              var message = {type: 'setLoggedIn', wiki: wikiName, token: token}
+              var messageData = $tw.Bob.Shared.createMessageData(message)
+              $tw.Bob.Shared.sendMessage(messageData, 0)
+            }
+          }
+        }
       } else {
         self.setLoggedOut();
       }

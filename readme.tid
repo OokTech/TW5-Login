@@ -24,6 +24,16 @@ servers that don't need it.
 |!cookieName |The name of the cookie to store the received token in. Default: `token` |
 |!localstorageKey |The name of the localStorage key to store the token in. Default: `ws-token` |
 |!saveCookie |This sets if the received access token should be saved in a cookie or not. Default: false |
+|!bobLogin |This sets if the current wiki should be set as logged in on the server using the received token. Default: `true` |
+
+!!! The `bobLogin` parameter
+
+If you are using this with Bob and are loging into the server your wiki is on
+than setting this to true will make sure that the heartbeat and other
+interactions with the server start like they should.
+
+If you aer using this to get a token for a remote server than you should set
+`bobLogin` to `false`.
 
 !!Usage
 
