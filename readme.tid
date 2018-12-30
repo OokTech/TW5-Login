@@ -38,7 +38,27 @@ If you aer using this to get a token for a remote server than you should set
 !!Usage
 
 ```
+<$set name=LoginState value={{$:/state/OokTech/Login}}>
 <$login-widget url='/authenticate' cookieName='token' localstorageKey='ws-token'/>
+</$set>
+```
+
+The set widget is necessary to force the login widget to correctly update
+when you are logged out by something else.
+
+!!The Change Password Widget
+
+If you are using the secure wiki server than the change password widget
+lets you change your password.
+
+You enter your current password in the field labeled `Old Password` and
+the new password in the fields labeled `New Password` and
+`New Password Again`
+
+!!Usage
+
+```
+<$change-password-widget/>
 ```
 
 !!A Note About Cookies

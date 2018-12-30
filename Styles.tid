@@ -53,3 +53,43 @@ type: text/css
   float:right;
   width: 12em;
 }
+.changepwdclass {
+  width: 400px;
+  text-align: center;
+  vertical-align: middle;
+  line-height: 2.5em;
+}
+.changepwdclass #statusdiv {
+  height: 1.2em;
+  font-size: 2em;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.changepwdclass #checkdiv {
+  line-height: 2em;
+}
+.changepwdclass #oldpwd {
+  height: 2.5em;
+  vertical-align: bottom;
+}
+.changepwdclass #oldpwd input {
+  float: right;
+  width: 12em;
+}
+.changepwdclass #newpwd1 {
+  height: 2.5em;
+  vertical-align: bottom;
+}
+.changepwdclass #newpwd1 input {
+  float: right;
+  width: 12em;
+}
+.changepwdclass #newpwd2 {
+  height: 2.5em;
+  vertical-align: bottom;
+}
+.changepwdclass #newpwd2 input {
+  float: right;
+  width: 12em;
+}

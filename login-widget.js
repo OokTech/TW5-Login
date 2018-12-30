@@ -128,10 +128,19 @@ Login.prototype.execute = function() {
   this.bobLogin = this.getAttribute('bobLogin', 'true')
   this.token = localStorage.getItem(this.localstorageKey);
   this.name = undefined;
+	this.loggedin = false;
+	if (!this.previousCheck) {
+		this.previousCheck = Date.now()
+	}
   if (this.token) {
     try {
       this.name = JSON.parse(window.atob(this.token.split('.')[1])).name;
       this.expires = JSON.parse(window.atob(this.token.split('.')[1])).exp;
+			if (this.expires*1000 > Date.now()) {
+				this.loggedin = true;
+				var self = this;
+				this.timeout = setTimeout(function(){self.refreshSelf()}, this.expires*1000 - Date.now() + 100);
+			}
     } catch (e) {
 
     }
@@ -258,6 +267,7 @@ Login.prototype.getLoginState = function () {
 
 Login.prototype.setLoggedIn = function () {
   // $:/state/OokTech/Login -> true
+	this.loggedin = true;
   $tw.wiki.setText('$:/state/OokTech/Login', 'text', null, 'true');
   this.refreshSelf();
   console.log('Yay!!');
@@ -265,6 +275,7 @@ Login.prototype.setLoggedIn = function () {
 
 Login.prototype.setLoggedOut = function () {
   // $:/state/OokTech/Login -> false
+	this.loggedin = false;
   $tw.wiki.setText('$:/state/OokTech/Login', 'text', null, 'false');
   this.refreshSelf();
   console.log('Boo!');
@@ -284,7 +295,8 @@ Refresh the widget by ensuring our attributes are up to date
 */
 Login.prototype.refresh = function(changedTiddlers) {
 	var changedAttributes = this.computeAttributes();
-	if(Object.keys(changedAttributes).length > 0 || (this.expires > Date.now()) || !this.expires) {
+	if(Object.keys(changedAttributes).length > 0 || (this.loggedin && ((this.expires * 1000 < Date.now()) || !this.expires)) || this.previousCheck + 1000 < Date.now()) {
+		this.previousCheck = Date.now();
 		this.refreshSelf();
 		return true;
 	}

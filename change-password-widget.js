@@ -38,7 +38,7 @@ ChangePassword.prototype.render = function(parent,nextSibling) {
 
 	var domNode = this.document.createElement("div");
   domNode.setAttribute('id', 'changepassworddiv')
-  domNode.className='changepasswordclass'
+  domNode.className='changepwdclass'
   var statusDiv = this.document.createElement('div')
   statusDiv.setAttribute('id', 'statusdiv')
   domNode.appendChild(statusDiv)
@@ -46,12 +46,12 @@ ChangePassword.prototype.render = function(parent,nextSibling) {
   domNode.appendChild(urlDiv)
   urlDiv.innerHTML = 'on ' + this.url
   var passSpan1 = this.document.createElement('div');
-  passSpan1.appendChild(this.document.createTextNode('Password:'));
+  passSpan1.appendChild(this.document.createTextNode('Old Password:'));
   var passNode = this.document.createElement("input");
   passNode.setAttribute('type', 'password');
   passNode.setAttribute('id', 'oldpwdtext');
   passSpan1.appendChild(passNode);
-  passSpan1.setAttribute('id', 'pwd');
+  passSpan1.setAttribute('id', 'oldpwd');
 	var passSpan2 = this.document.createElement('div');
   passSpan2.appendChild(this.document.createTextNode('New Password:'));
 	var newPassNode1 = this.document.createElement("input");
@@ -69,22 +69,32 @@ ChangePassword.prototype.render = function(parent,nextSibling) {
   domNode.appendChild(passSpan1);
 	domNode.appendChild(passSpan2);
 	domNode.appendChild(passSpan3);
+	if (this.requireConfirmation) {
+		var checkDiv = this.document.createElement('div');
+		checkDiv.setAttribute('id', 'checkdiv')
+		var confirmationCheckbox = this.document.createElement('input');
+		confirmationCheckbox.setAttribute('type','checkbox');
+		confirmationCheckbox.setAttribute('id','confirmCheck');
+		checkDiv.appendChild(confirmationCheckbox);
+		var checkLabel = this.document.createElement('label');
+		checkLabel.setAttribute('for', 'confirmCheck');
+		checkLabel.innerHTML = ' I do want to change my password';
+		checkDiv.appendChild(checkLabel);
+		domNode.appendChild(checkDiv);
+	}
   var changepasswordbutton = this.document.createElement('input');
   changepasswordbutton.setAttribute('type', 'button');
-  changepasswordbutton.setAttribute('value', 'ChangePassword');
+  changepasswordbutton.setAttribute('value', 'Change Password');
   changepasswordbutton.setAttribute('id', 'changepasswordbutton');
   changepasswordbutton.addEventListener('click', function (event) {self.changePassword();});
   domNode.appendChild(changepasswordbutton);
 
   var loginState = this.getLoginState();
   if (loginState) {
-    $tw.wiki.setText('$:/state/OokTech/Login', 'text', null, 'true');
-    passNode.disabled = false;
-    statusDiv.innerHTML =  'Logged in as ' + this.name;
+		statusDiv.innerHTML =  'Logged In'
     domNode.classList.add('loggedin');
     domNode.classList.remove('loggedout');
   } else {
-    passNode.disabled = false;
     statusDiv.innerHTML =  'Logged Out'
     domNode.classList.remove('loggedin');
     domNode.classList.add('loggedout');
@@ -103,13 +113,19 @@ ChangePassword.prototype.execute = function() {
 	this.url = this.getAttribute('url', '/api/credentials/update/');
 	this.cookieName = this.getAttribute('cookieName', 'token');
   this.localstorageKey = this.getAttribute('localstorageKey', 'ws-token');
+	this.requireConfirmation = this.getAttribute('requireConfirmation', true);
+	this.confirmationTiddler = this.getAttribute('confirmationTiddler', '$:/state/OokTech/Login/ChangePasswordConfirm');
   this.token = localStorage.getItem(this.localstorageKey);
   this.name = undefined;
+	this.loggedin = false
   if (this.token) {
     try {
       this.name = JSON.parse(window.atob(this.token.split('.')[1])).name;
       this.expires = JSON.parse(window.atob(this.token.split('.')[1])).exp;
 			this.level = JSON.parse(window.atob(this.token.split('.')[1])).level;
+			if (this.expires*1000 > Date.now()) {
+				this.loggedin = true
+			}
     } catch (e) {
 
     }
@@ -122,38 +138,40 @@ ChangePassword.prototype.execute = function() {
   localstorage
 */
 ChangePassword.prototype.changePassword = function() {
-  var self = this;
-	var newPassword = document.getElementById('newpwdtext1').value;
-	var newPassword2 = document.getElementById('newpwdtext2').value;
-	// Make sure that the two new password entry values match
-	if (newPassword === newPassword2) {
-	  // We can only do this if the destination is https. So either we are on an
-	  // https server and it is local (the url doesn't start with http) or we are
-	  // sending to an https url
-	  if ((window.location.protocol === 'https:' && (self.url.startsWith('https://') || !self.url.startsWith('http'))) || self.url.startsWith('https://')) {
-			if (self.name) {
-		    var xhr = new XMLHttpRequest();
-		    xhr.open('POST', self.url+self.name, true);
-		    xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
-		    xhr.onload = function () {
-		      // do something to response
-		      if (this.responseText && this.status == "200") {
-						// We need to parse the response text
-						// Remove the stored token
-		        localStorage.removeItem(self.localstorageKey);
-		        // Log out to make the person log in with the new password
-		        self.logout()
-		      } else {
-		        self.showError(this.status);
-		      }
-		    }
-		    var name = self.name;
-		    var password = document.getElementById('oldpwdtext').value;
-				var newPassword = document.getElementById('newpwdtext1').value;
-				var level = self.level;
-		    xhr.send(`name=${name}&pwd=${password}&new=${newPassword}&level=${level}`);
-			}
-	  }
+	if ((!this.requireConfirmation || this.document.getElementById('confirmCheck').checked) && this.loggedin) {
+	  var self = this;
+		var newPassword = document.getElementById('newpwdtext1').value;
+		var newPassword2 = document.getElementById('newpwdtext2').value;
+		// Make sure that the two new password entry values match
+		if (newPassword === newPassword2) {
+		  // We can only do this if the destination is https. So either we are on an
+		  // https server and it is local (the url doesn't start with http) or we are
+		  // sending to an https url
+		  if ((window.location.protocol === 'https:' && (self.url.startsWith('https://') || !self.url.startsWith('http'))) || self.url.startsWith('https://')) {
+				if (self.name) {
+			    var xhr = new XMLHttpRequest();
+			    xhr.open('POST', self.url+self.name, true);
+			    xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+			    xhr.onload = function () {
+			      // do something to response
+			      if (this.status == "200") {
+							// We need to parse the response text
+							// Remove the stored token
+			        localStorage.removeItem(self.localstorageKey);
+			        // Log out to make the person log in with the new password
+			        self.logout()
+			      } else {
+			        self.showError(this.status);
+			      }
+			    }
+			    var name = self.name;
+			    var password = document.getElementById('oldpwdtext').value;
+					var newPassword = document.getElementById('newpwdtext1').value;
+					var level = self.level;
+			    xhr.send(`name=${name}&pwd=${password}&new=${newPassword}&level=${level}`);
+				}
+		  }
+		}
 	}
 }
 
@@ -171,20 +189,20 @@ ChangePassword.prototype.getLoginState = function () {
   }
 }
 
-function getCookie(name) {
-  var value = " " + document.cookie;
-  var start = value.indexOf(" " + name + "=");
-  if (start == -1) {
-    value = null;
+function getCookie(c_name) {
+  var c_value = " " + document.cookie;
+  var c_start = c_value.indexOf(" " + c_name + "=");
+  if (c_start == -1) {
+    c_value = null;
   } else {
-    start = value.indexOf("=", start) + 1;
-    var end = value.indexOf(";", start);
-    if (end == -1) {
-      end = value.length;
+    c_start = c_value.indexOf("=", c_start) + 1;
+    var c_end = c_value.indexOf(";", c_start);
+    if (c_end == -1) {
+      c_end = c_value.length;
     }
-    value = unescape(value.substring(start,end));
+    c_value = unescape(c_value.substring(c_start,c_end));
   }
-  return value;
+  return c_value;
 }
 
 ChangePassword.prototype.getLoginState = function () {
@@ -205,7 +223,6 @@ ChangePassword.prototype.setLoggedOut = function () {
   // $:/state/OokTech/Login -> false
   $tw.wiki.setText('$:/state/OokTech/Login', 'text', null, 'false');
   this.refreshSelf();
-  console.log('Boo!');
 }
 
 /*
