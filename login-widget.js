@@ -121,7 +121,7 @@ Compute the internal state of the widget
 Login.prototype.execute = function() {
 	//Get widget attributes.
 	this.url = this.getAttribute('url', '/authenticate');
-  this.saveCookie = this.getAttribute('saveCookie', false);
+  this.saveCookie = this.getAttribute('saveCookie', true);
 	this.cookieName = this.getAttribute('cookieName', 'token');
   this.localstorageKey = this.getAttribute('localstorageKey', 'ws-token');
   this.guestLogin = this.getAttribute('guestLogin', 'false');
