@@ -55,7 +55,7 @@ SetPassword.prototype.render = function(parent,nextSibling) {
   passwordCell.innerHTML = 'Password';
   const passwordInputCell = this.document.createElement('td');
   const passwordInput = this.document.createElement('input');
-  passwordInputCell.setAttribute('type', 'password');
+  passwordInput.setAttribute('type', 'password');
   passwordInput.setAttribute('id', 'pwdtext');
   passwordInputCell.appendChild(passwordInput);
   passwordRow.appendChild(passwordCell);
@@ -96,22 +96,8 @@ Compute the internal state of the widget
 SetPassword.prototype.execute = function() {
   //Get widget attributes.
   this.cookieName = this.getAttribute('cookieName', 'token');
-  this.localstorageKey = this.getAttribute('localstorageKey', 'ws-token');
-  this.token = localStorage.getItem(this.localstorageKey);
   this.name = undefined;
-  if (this.token) {
-    try {
-      this.name = JSON.parse(window.atob(this.token.split('.')[1])).name;
-      this.expires = JSON.parse(window.atob(this.token.split('.')[1])).exp;
-      if (this.expires*1000 > Date.now()) {
-        if (typeof this.name !== 'undefined') {
-          this.url = '/api/credentials/add/' + this.name;
-        }
-      }
-    } catch (e) {
-
-    }
-  }
+  this.url = '/api/credentials/add/'
 };
 
 /*
@@ -125,6 +111,7 @@ SetPassword.prototype.setPassword = function() {
   const name = document.getElementById('usertext').value;
   const password = document.getElementById('pwdtext').value;
   const level = 'Admin'
+  self.url += name
   //var level = document.getElementById('userlevel').value;
   if (name && password && level) {
     // We can only do this if the destination is https. So either we are on an
@@ -132,6 +119,7 @@ SetPassword.prototype.setPassword = function() {
     // sending to an https url
     if ((window.location.protocol === 'https:' && (self.url.startsWith('https://') || !self.url.startsWith('http'))) || self.url.startsWith('https://')) {
       const xhr = new XMLHttpRequest();
+      xhr.withCredentials = true
       xhr.open('POST', self.url, true);
       xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
       xhr.onload = function () {
@@ -140,22 +128,6 @@ SetPassword.prototype.setPassword = function() {
       xhr.send(`name=${name}&pwd=${password}&lvl=${level}`);
     }
   }
-}
-
-function getCookie(c_name) {
-  let c_value = " " + document.cookie;
-  let c_start = c_value.indexOf(" " + c_name + "=");
-  if (c_start == -1) {
-    c_value = null;
-  } else {
-    c_start = c_value.indexOf("=", c_start) + 1;
-    let c_end = c_value.indexOf(";", c_start);
-    if (c_end == -1) {
-      c_end = c_value.length;
-    }
-    c_value = unescape(c_value.substring(c_start,c_end));
-  }
-  return c_value;
 }
 
 /*
