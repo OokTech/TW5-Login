@@ -13,11 +13,11 @@ A widget that creates a login interface for a restful server.
 /*global $tw: false */
 "use strict";
 
-var Widget = require("$:/core/modules/widgets/widget.js").widget;
-var widgets;
-var container;
+const Widget = require("$:/core/modules/widgets/widget.js").widget;
+let widgets;
+let container;
 
-var Login = function(parseTreeNode,options) {
+const Login = function(parseTreeNode,options) {
 	this.initialise(parseTreeNode,options);
 };
 
@@ -34,48 +34,49 @@ Login.prototype.render = function(parent,nextSibling) {
 	this.computeAttributes();
 	this.execute();
 
-  var self = this;
+  const self = this;
 
-	var domNode = this.document.createElement("div");
+	const domNode = this.document.createElement("div");
   domNode.setAttribute('id', 'logindiv')
   domNode.className='loginclass'
-  var statusDiv = this.document.createElement('div')
+  const statusDiv = this.document.createElement('div')
   statusDiv.setAttribute('id', 'statusdiv')
   domNode.appendChild(statusDiv)
-  var urlDiv = this.document.createElement('div')
+  const urlDiv = this.document.createElement('div')
   domNode.appendChild(urlDiv)
   urlDiv.innerHTML = 'on ' + this.url
-  var userSpan = this.document.createElement('div');
+  const userSpan = this.document.createElement('div');
   userSpan.appendChild(this.document.createTextNode('Name:'))
-  var userNode = this.document.createElement("input")
+  const userNode = this.document.createElement("input")
   userNode.setAttribute('type', 'text')
   userNode.setAttribute('id', 'usertext')
   userSpan.setAttribute('id', 'user')
   userSpan.appendChild(userNode)
-  var passSpan = this.document.createElement('div');
+  const passSpan = this.document.createElement('div');
   passSpan.appendChild(this.document.createTextNode('Password:'));
-  var passNode = this.document.createElement("input");
+  const passNode = this.document.createElement("input");
   passNode.setAttribute('type', 'password');
   passNode.setAttribute('id', 'pwdtext');
   passSpan.appendChild(passNode);
   passSpan.setAttribute('id', 'pwd');
   domNode.appendChild(userSpan);
   domNode.appendChild(passSpan);
-  var loginbutton = this.document.createElement('input');
+  const loginbutton = this.document.createElement('input');
   loginbutton.setAttribute('type', 'button');
   loginbutton.setAttribute('value', 'Login');
   loginbutton.setAttribute('id', 'loginbutton');
   loginbutton.addEventListener('click', function (event) {self.login();});
   domNode.appendChild(loginbutton);
-  var logoutbutton = this.document.createElement('input');
+  const logoutbutton = this.document.createElement('input');
   logoutbutton.setAttribute('type', 'button');
   logoutbutton.setAttribute('value', 'Logout');
   logoutbutton.setAttribute('id', 'logoutbutton');
   logoutbutton.addEventListener('click', function (event) {self.logout();});
   domNode.appendChild(logoutbutton);
 
+	let guest = false;
   if (this.guestLogin) {
-    var guest = this.document.createElement('input');
+    guest = this.document.createElement('input');
     guest.setAttribute('type', 'button');
     guest.setAttribute('value', 'Login as Guest');
     guest.setAttribute('id', 'guestLoginButton');
@@ -84,7 +85,7 @@ Login.prototype.render = function(parent,nextSibling) {
     domNode.appendChild(guest);
   }
 
-  var loginState = this.getLoginState();
+  const loginState = this.getLoginState();
   if (loginState) {
     $tw.wiki.setText('$:/state/OokTech/Login', 'text', null, 'true');
     if (this.guestLogin) {
@@ -138,7 +139,7 @@ Login.prototype.execute = function() {
       this.expires = JSON.parse(window.atob(this.token.split('.')[1])).exp;
 			if (this.expires*1000 > Date.now()) {
 				this.loggedin = true;
-				var self = this;
+				const self = this;
 				this.timeout = setTimeout(function(){self.refreshSelf()}, this.expires*1000 - Date.now() + 100);
 			}
     } catch (e) {
@@ -174,30 +175,30 @@ Login.prototype.login = function() {
     xhr.onload = function () {
       // do something to response
       if (this.responseText && this.status == "200") {
+				var expires = new Date();
+        expires.setTime(expires.getTime() + 24*60*60*1000);
         localStorage.setItem(self.localstorageKey, this.responseText);
-        //this.token = this.responseText;
+				localStorage.setItem('token-eol', expires.getTime());
         self.token = this.responseText;
         self.expires = JSON.parse(window.atob(self.token.split('.')[1])).exp;
-        var expires = new Date();
-        expires.setTime(expires.getTime() + 24*60*60*1000)
         if (self.saveCookie === 'true') {
           document.cookie = self.cookieName + '=' + this.responseText + '; expires=' + expires + '; path=/;'
+					document.cookie = 'token-eol' + '=' + expires.getTime() +'; path=/;'
         }
         self.setLoggedIn()
         // take care of the Bob login things, if they exist
         if (typeof this.bobLogin !== 'string') {
           this.bobLogin = '';
         }
-        if ($tw.Bob && this.bobLogin.toLowerCase() === 'true') {
-          if ($tw.Bob.Shared) {
-            if (typeof $tw.Bob.Shared.sendMessage === 'function') {
-              var token = this.token;//localStorage.getItem('ws-token');
-              var wikiName = $tw.wiki.getTiddlerText("$:/WikiName");
-              var message = {type: 'setLoggedIn', wiki: wikiName, token: token}
-              var messageData = $tw.Bob.Shared.createMessageData(message)
-              $tw.Bob.Shared.sendMessage(messageData, 0)
-            }
-          }
+        if ($tw.Bob && self.bobLogin.toLowerCase() === 'true') {
+					var token = self.token;
+					var wikiName = $tw.wiki.getTiddlerText("$:/WikiName");
+					$tw.connections[0].socket.send(JSON.stringify({
+	          type: 'setLoggedIn',
+	          token: token,
+						heartbeat: true,
+	          wiki: $tw.wikiName
+	        }));
         }
       } else {
         self.setLoggedOut();
@@ -252,8 +253,8 @@ function getCookie(name) {
 }
 
 Login.prototype.getLoginState = function () {
-  var token = localStorage.getItem(this.localstorageKey)
-  var exp = 0;
+  const token = localStorage.getItem(this.localstorageKey)
+  let exp = 0;
   if (token) {
     try {
       exp = JSON.parse(atob(token.split('.')[1])).exp*1000;
@@ -294,7 +295,7 @@ Login.prototype.logout = function () {
 Refresh the widget by ensuring our attributes are up to date
 */
 Login.prototype.refresh = function(changedTiddlers) {
-	var changedAttributes = this.computeAttributes();
+	const changedAttributes = this.computeAttributes();
 	if(Object.keys(changedAttributes).length > 0 || (this.loggedin && ((this.expires * 1000 < Date.now()) || !this.expires)) || this.previousCheck + 1000 < Date.now()) {
 		this.previousCheck = Date.now();
 		this.refreshSelf();

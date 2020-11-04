@@ -30,8 +30,6 @@ Render this widget into the DOM
 SetPassword.prototype.render = function(parent,nextSibling) {
   this.parentDomNode = parent;
   this.computeAttributes();
-  this.execute();
-
   const self = this;
 
   const domNode = this.document.createElement("div");
@@ -76,14 +74,27 @@ SetPassword.prototype.render = function(parent,nextSibling) {
   theTable.appendChild(passwordRow);
   theTable.appendChild(confirmRow);
 
-  const SetPasswordbutton = this.document.createElement('input');
-  SetPasswordbutton.setAttribute('type', 'button');
-  SetPasswordbutton.setAttribute('value', 'Create Login');
-  SetPasswordbutton.setAttribute('id', 'SetPasswordbutton');
-  SetPasswordbutton.addEventListener('click', function (event) {self.setPassword();});
+  const setPasswordButton = this.document.createElement('input');
+  setPasswordButton.setAttribute('type', 'button');
+  setPasswordButton.setAttribute('value', 'Create Login');
+  setPasswordButton.setAttribute('id', 'SetPasswordbutton');
+  setPasswordButton.addEventListener('click', function (event) {self.setPassword();});
 
   domNode.appendChild(theTable);
-  domNode.appendChild(SetPasswordbutton);
+  domNode.appendChild(setPasswordButton);
+
+  // If dispable is set than disable the widget based on  the disable flag
+  const disableTiddler = this.wiki.getTiddler(this.disableFlag);
+  if (disableTiddler) {
+    if (disableTiddler.fields.text === 'disable') {
+      confirmInput.disabled = true;
+      passwordInput.disabled = true;
+      nameInput.disabled = true;
+      setPasswordButton.disabled = true;
+    }
+  }
+
+  this.execute();
 
   parent.insertBefore(domNode,nextSibling);
   this.renderChildren(domNode,null);
@@ -95,9 +106,14 @@ Compute the internal state of the widget
 */
 SetPassword.prototype.execute = function() {
   //Get widget attributes.
+  this.level = this.getAttribute('level', 'Guest');
+  this.disableFlag = this.getAttribute('disableState', false);
+  this.autologin = this.getAttribute('autoLogin', 'no');
   this.cookieName = this.getAttribute('cookieName', 'token');
+  this.localstorageKey = this.getAttribute('localstorageKey', 'ws-token');
+  this.bobLogin = this.getAttribute('bobLogin', 'true');
   this.name = undefined;
-  this.url = '/api/credentials/add/'
+  this.BaseUrl = '/api/credentials/add/';
 };
 
 /*
@@ -107,11 +123,12 @@ SetPassword.prototype.execute = function() {
 */
 SetPassword.prototype.setPassword = function() {
   const self = this;
+  this.computeAttributes();
   // make sure that the inputs are set.
   const name = document.getElementById('usertext').value;
   const password = document.getElementById('pwdtext').value;
-  const level = 'Admin'
-  self.url += name
+  const level = self.level;
+  self.url = self.BaseUrl + name;
   //var level = document.getElementById('userlevel').value;
   if (name && password && level) {
     // We can only do this if the destination is https. So either we are on an
@@ -124,6 +141,55 @@ SetPassword.prototype.setPassword = function() {
       xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
       xhr.onload = function () {
         // do something to response
+        console.log('setPassword response', xhr.responseText)
+        if (xhr.responseText === 'Success') {
+          // Handle success
+          if (self.autologin === 'yes') {
+            // If autologin is set than login as the new person
+            const xhr2 = new XMLHttpRequest();
+            xhr2.open('POST', '/authenticate', true);
+            xhr2.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+            xhr2.onload = function () {
+              // do something to response
+              if (self.responseText && self.status == "200") {
+                localStorage.setItem(self.localstorageKey, self.responseText);
+                self.token = self.responseText;
+                self.expires = JSON.parse(window.atob(self.token.split('.')[1])).exp;
+                const expires = new Date();
+                expires.setTime(expires.getTime() + 24*60*60*1000)
+                if (self.saveCookie === 'true') {
+                  document.cookie = self.cookieName + '=' + self.responseText + '; expires=' + expires + '; path=/;'
+                }
+                //self.setLoggedIn()
+                // take care of the Bob login things, if they exist
+                if (typeof self.bobLogin !== 'string') {
+                  self.bobLogin = '';
+                }
+                if ($tw.Bob && self.bobLogin.toLowerCase() === 'true' || self.bobLogin.toLowerCase() === 'yes') {
+                  if ($tw.Bob.Shared) {
+                    if (typeof $tw.Bob.Shared.sendMessage === 'function') {
+                      const token = self.token;
+                      const wikiName = $tw.wiki.getTiddlerText("$:/WikiName");
+                      const message = {type: 'setLoggedIn', wiki: wikiName, token: token}
+                      const messageData = $tw.Bob.Shared.createMessageData(message)
+                      $tw.Bob.Shared.sendMessage(messageData, 0)
+                    }
+                  }
+                }
+              } else {
+                //self.setLoggedOut();
+              }
+            }
+            xhr2.send(`name=${name}&pwd=${password}`);
+          }
+          if (typeof self.disableFlag === 'string') {
+            // Set the text to 'disabled'
+            self.wiki.setText(self.disableFlag, 'text', undefined, 'disabled')
+          }
+        } else {
+          // Handle failure
+          // Something?
+        }
       }
       xhr.send(`name=${name}&pwd=${password}&lvl=${level}`);
     }
