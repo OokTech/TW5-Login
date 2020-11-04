@@ -31,6 +31,9 @@ SetPassword.prototype.render = function(parent,nextSibling) {
   this.parentDomNode = parent;
   this.computeAttributes();
   const self = this;
+  this.pwd_id = Math.random();
+  this.cnfrm_id = Math.random();
+  this.user_id = Math.random();
 
   const domNode = this.document.createElement("div");
   domNode.setAttribute('id', 'setpassworddiv');
@@ -43,7 +46,7 @@ SetPassword.prototype.render = function(parent,nextSibling) {
   const nameInputCell = this.document.createElement('td');
   const nameInput = this.document.createElement('input');
   nameInput.setAttribute('type', 'text');
-  nameInput.setAttribute('id', 'usertext');
+  nameInput.setAttribute('id', this.user_id);
   nameInputCell.appendChild(nameInput);
   nameRow.appendChild(nameCell);
   nameRow.appendChild(nameInputCell);
@@ -54,7 +57,7 @@ SetPassword.prototype.render = function(parent,nextSibling) {
   const passwordInputCell = this.document.createElement('td');
   const passwordInput = this.document.createElement('input');
   passwordInput.setAttribute('type', 'password');
-  passwordInput.setAttribute('id', 'pwdtext');
+  passwordInput.setAttribute('id', this.pwd_id);
   passwordInputCell.appendChild(passwordInput);
   passwordRow.appendChild(passwordCell);
   passwordRow.appendChild(passwordInputCell);
@@ -65,7 +68,7 @@ SetPassword.prototype.render = function(parent,nextSibling) {
   const confirmInputCell = this.document.createElement('td');
   const confirmInput = this.document.createElement('input');
   confirmInput.setAttribute('type', 'password');
-  confirmInput.setAttribute('id', 'confirmtext');
+  confirmInput.setAttribute('id', this.cnfrm_id);
   confirmInputCell.appendChild(confirmInput);
   confirmRow.appendChild(confirmCell);
   confirmRow.appendChild(confirmInputCell);
@@ -125,12 +128,12 @@ SetPassword.prototype.setPassword = function() {
   const self = this;
   this.computeAttributes();
   // make sure that the inputs are set.
-  const name = document.getElementById('usertext').value;
-  const password = document.getElementById('pwdtext').value;
+  const name = document.getElementById(this.user_id).value;
+  const password = document.getElementById(this.pwd_id).value;
+  const confirm = document.getElementById(this.cnfrm_id).value;
   const level = self.level;
   self.url = self.BaseUrl + name;
-  //var level = document.getElementById('userlevel').value;
-  if (name && password && level) {
+  if (name && password && level && (password === confirm)) {
     // We can only do this if the destination is https. So either we are on an
     // https server and it is local (the url doesn't start with http) or we are
     // sending to an https url
@@ -173,11 +176,12 @@ SetPassword.prototype.setPassword = function() {
                       const message = {type: 'setLoggedIn', wiki: wikiName, token: token}
                       const messageData = $tw.Bob.Shared.createMessageData(message)
                       $tw.Bob.Shared.sendMessage(messageData, 0)
+                      self.setLoggedIn()
                     }
                   }
                 }
               } else {
-                //self.setLoggedOut();
+                
               }
             }
             xhr2.send(`name=${name}&pwd=${password}`);
