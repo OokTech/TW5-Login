@@ -191,6 +191,9 @@ Login.prototype.login = function() {
           this.bobLogin = '';
         }
         if ($tw.Bob && self.bobLogin.toLowerCase() === 'true') {
+					if (typeof $tw.Bob.getSettings === 'function') {
+						$tw.Bob.getSettings();
+					}
 					var token = self.token;
 					var wikiName = $tw.wiki.getTiddlerText("$:/WikiName");
 					$tw.connections[0].socket.send(JSON.stringify({
@@ -288,6 +291,9 @@ Login.prototype.setLoggedOut = function () {
 Login.prototype.logout = function () {
   localStorage.removeItem(this.localstorageKey);
   document.cookie = this.cookieName + '=;expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+	if ($tw.Bob && typeof $tw.Bob.getSettings === 'function') {
+		$tw.Bob.getSettings();
+	}
   this.setLoggedOut();
 }
 
