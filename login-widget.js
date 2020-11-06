@@ -75,7 +75,7 @@ Login.prototype.render = function(parent,nextSibling) {
   domNode.appendChild(logoutbutton);
 
 	let guest = false;
-  if (this.guestLogin) {
+  if (this.guestLogin === 'yes') {
     guest = this.document.createElement('input');
     guest.setAttribute('type', 'button');
     guest.setAttribute('value', 'Login as Guest');
@@ -88,7 +88,7 @@ Login.prototype.render = function(parent,nextSibling) {
   const loginState = this.getLoginState();
   if (loginState) {
     $tw.wiki.setText('$:/state/OokTech/Login', 'text', null, 'true');
-    if (this.guestLogin) {
+    if (this.guestLogin === 'yes') {
       guest.disabled = true;
     }
     passNode.disabled = true;
@@ -99,7 +99,7 @@ Login.prototype.render = function(parent,nextSibling) {
     domNode.classList.add('loggedin');
     domNode.classList.remove('loggedout');
   } else {
-    if (this.guestLogin) {
+    if (this.guestLogin === 'yes') {
       guest.disabled = false;
     }
     passNode.disabled = false;
@@ -125,7 +125,7 @@ Login.prototype.execute = function() {
   this.saveCookie = this.getAttribute('saveCookie', true);
 	this.cookieName = this.getAttribute('cookieName', 'token');
   this.localstorageKey = this.getAttribute('localstorageKey', 'ws-token');
-  this.guestLogin = this.getAttribute('guestLogin', 'false');
+  this.guestLogin = this.getAttribute('guestLogin', 'no');
   this.bobLogin = this.getAttribute('bobLogin', 'true')
   this.token = localStorage.getItem(this.localstorageKey);
   this.name = undefined;
