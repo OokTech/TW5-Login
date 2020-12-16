@@ -89,9 +89,7 @@ SetPassword.prototype.render = function(parent,nextSibling) {
   // If dispable is set than disable the widget based on  the disable flag
   const disableTiddler = this.wiki.getTiddler(this.disableFlag);
   if (disableTiddler) {
-    console.log(disableTiddler)
     if (disableTiddler.fields.text === 'disable') {
-      console.log('disable')
       confirmInput.disabled = true;
       passwordInput.disabled = true;
       nameInput.disabled = true;

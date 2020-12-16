@@ -91,7 +91,7 @@ ChangePassword.prototype.render = function(parent,nextSibling) {
 
   var loginState = this.getLoginState();
   if (loginState) {
-		statusDiv.innerHTML =  'Logged In'
+		statusDiv.innerHTML =  'Logged In As' + this.name;
     domNode.classList.add('loggedin');
     domNode.classList.remove('loggedout');
   } else {
