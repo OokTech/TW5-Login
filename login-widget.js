@@ -122,7 +122,7 @@ Compute the internal state of the widget
 Login.prototype.execute = function() {
 	//Get widget attributes.
 	this.url = this.getAttribute('url', '/authenticate');
-  this.saveCookie = this.getAttribute('saveCookie', true);
+  this.saveCookie = this.getAttribute('saveCookie', 'yes');
 	this.cookieName = this.getAttribute('cookieName', 'token');
   this.localstorageKey = this.getAttribute('localstorageKey', 'ws-token');
   this.guestLogin = this.getAttribute('guestLogin', 'no');
@@ -169,19 +169,19 @@ Login.prototype.login = function() {
   // https server and it is local (the url doesn't start with http) or we are
   // sending to an https url
   if ((window.location.protocol === 'https:' && (self.url.startsWith('https://') || !self.url.startsWith('http'))) || self.url.startsWith('https://')) {
-    var xhr = new XMLHttpRequest();
+    const xhr = new XMLHttpRequest();
     xhr.open('POST', self.url, true);
     xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
     xhr.onload = function () {
       // do something to response
       if (this.responseText && this.status == "200") {
-				var expires = new Date();
+				const expires = new Date();
         expires.setTime(expires.getTime() + 24*60*60*1000);
         localStorage.setItem(self.localstorageKey, this.responseText);
 				localStorage.setItem('token-eol', expires.getTime());
         self.token = this.responseText;
         self.expires = JSON.parse(window.atob(self.token.split('.')[1])).exp;
-        if (self.saveCookie === 'true') {
+        if (self.saveCookie === 'yes' || self.saveCookie === true || self.saveCookie === 'true') {
           document.cookie = self.cookieName + '=' + this.responseText + '; expires=' + expires + '; path=/;'
 					document.cookie = 'token-eol' + '=' + expires.getTime() +'; path=/;'
         }
@@ -194,11 +194,9 @@ Login.prototype.login = function() {
 					if (typeof $tw.Bob.getSettings === 'function') {
 						$tw.Bob.getSettings();
 					}
-					var token = self.token;
-					var wikiName = $tw.wiki.getTiddlerText("$:/WikiName");
 					$tw.connections[0].socket.send(JSON.stringify({
 	          type: 'setLoggedIn',
-	          token: token,
+	          token: self.token,
 						heartbeat: true,
 	          wiki: $tw.wikiName
 	        }));
@@ -207,8 +205,8 @@ Login.prototype.login = function() {
         self.setLoggedOut();
       }
     }
-    var name = document.getElementById('usertext').value;
-    var password = document.getElementById('pwdtext').value;
+    const name = document.getElementById('usertext').value;
+    const password = document.getElementById('pwdtext').value;
     xhr.send(`name=${name}&pwd=${password}`);
   }
 }

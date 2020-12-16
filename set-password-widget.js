@@ -89,7 +89,9 @@ SetPassword.prototype.render = function(parent,nextSibling) {
   // If dispable is set than disable the widget based on  the disable flag
   const disableTiddler = this.wiki.getTiddler(this.disableFlag);
   if (disableTiddler) {
+    console.log(disableTiddler)
     if (disableTiddler.fields.text === 'disable') {
+      console.log('disable')
       confirmInput.disabled = true;
       passwordInput.disabled = true;
       nameInput.disabled = true;
@@ -115,6 +117,7 @@ SetPassword.prototype.execute = function() {
   this.cookieName = this.getAttribute('cookieName', 'token');
   this.localstorageKey = this.getAttribute('localstorageKey', 'ws-token');
   this.bobLogin = this.getAttribute('bobLogin', 'true');
+  this.saveCookie = this.getAttribute('saveCookie', 'yes')
   this.name = undefined;
   this.BaseUrl = '/api/credentials/add/';
 };
@@ -153,15 +156,18 @@ SetPassword.prototype.setPassword = function() {
             xhr2.open('POST', '/authenticate', true);
             xhr2.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
             xhr2.onload = function () {
+              console.log(1)
               // do something to response
-              if (self.responseText && self.status == "200") {
-                localStorage.setItem(self.localstorageKey, self.responseText);
-                self.token = self.responseText;
+              if (xhr2.responseText && xhr2.status == "200") {
+                console.log(2)
+                localStorage.setItem(self.localstorageKey, xhr2.responseText);
+                self.token = xhr2.responseText;
                 self.expires = JSON.parse(window.atob(self.token.split('.')[1])).exp;
                 const expires = new Date();
                 expires.setTime(expires.getTime() + 24*60*60*1000)
-                if (self.saveCookie === 'true') {
-                  document.cookie = self.cookieName + '=' + self.responseText + '; expires=' + expires + '; path=/;'
+                if (self.saveCookie !== 'no') {
+                  document.cookie = self.cookieName + '=' + this.responseText + '; expires=' + expires + '; path=/;'
+        					document.cookie = 'token-eol' + '=' + expires.getTime() +'; path=/;'
                 }
                 //self.setLoggedIn()
                 // take care of the Bob login things, if they exist
@@ -169,26 +175,33 @@ SetPassword.prototype.setPassword = function() {
                   self.bobLogin = '';
                 }
                 if ($tw.Bob && self.bobLogin.toLowerCase() === 'true' || self.bobLogin.toLowerCase() === 'yes') {
+                  if (typeof $tw.Bob.getSettings === 'function') {
+        						$tw.Bob.getSettings();
+        					}
                   if ($tw.Bob.Shared) {
                     if (typeof $tw.Bob.Shared.sendMessage === 'function') {
-                      const token = self.token;
-                      const wikiName = $tw.wiki.getTiddlerText("$:/WikiName");
-                      const message = {type: 'setLoggedIn', wiki: wikiName, token: token}
+                      const message = {
+                        type: 'setLoggedIn',
+                        wiki: $tw.wikiName,
+                        token: self.token,
+                        heartbeat: true
+                      }
                       const messageData = $tw.Bob.Shared.createMessageData(message)
                       $tw.Bob.Shared.sendMessage(messageData, 0)
-                      self.setLoggedIn()
+                      //self.setLoggedIn()
                     }
                   }
                 }
               } else {
-                
+
               }
             }
             xhr2.send(`name=${name}&pwd=${password}`);
           }
           if (typeof self.disableFlag === 'string') {
             // Set the text to 'disabled'
-            self.wiki.setText(self.disableFlag, 'text', undefined, 'disabled')
+            self.wiki.setText(self.disableFlag, 'text', undefined, 'disable')
+            self.refreshSelf();
           }
         } else {
           // Handle failure
