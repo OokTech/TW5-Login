@@ -165,7 +165,7 @@ SetPassword.prototype.setPassword = function() {
                 expires.setTime(expires.getTime() + 24*60*60*1000)
                 if (self.saveCookie !== 'no') {
                   document.cookie = self.cookieName + '=' + this.responseText + '; expires=' + expires + '; path=/;'
-        					document.cookie = 'token-eol' + '=' + expires.getTime() +'; path=/;'
+                  document.cookie = 'token-eol' + '=' + expires.getTime() +'; path=/;'
                 }
                 //self.setLoggedIn()
                 // take care of the Bob login things, if they exist
@@ -174,8 +174,8 @@ SetPassword.prototype.setPassword = function() {
                 }
                 if ($tw.Bob && self.bobLogin.toLowerCase() === 'true' || self.bobLogin.toLowerCase() === 'yes') {
                   if (typeof $tw.Bob.getSettings === 'function') {
-        						$tw.Bob.getSettings();
-        					}
+                    $tw.Bob.getSettings();
+                  }
                   if ($tw.Bob.Shared) {
                     if (typeof $tw.Bob.Shared.sendMessage === 'function') {
                       const message = {

@@ -18,7 +18,7 @@ let widgets;
 let container;
 
 const Login = function(parseTreeNode,options) {
-	this.initialise(parseTreeNode,options);
+  this.initialise(parseTreeNode,options);
 };
 
 /*
@@ -30,13 +30,13 @@ Login.prototype = new Widget();
 Render this widget into the DOM
 */
 Login.prototype.render = function(parent,nextSibling) {
-	this.parentDomNode = parent;
-	this.computeAttributes();
-	this.execute();
+  this.parentDomNode = parent;
+  this.computeAttributes();
+  this.execute();
 
   const self = this;
 
-	const domNode = this.document.createElement("div");
+  const domNode = this.document.createElement("div");
   domNode.setAttribute('id', 'logindiv')
   domNode.className='loginclass'
   const statusDiv = this.document.createElement('div')
@@ -74,7 +74,7 @@ Login.prototype.render = function(parent,nextSibling) {
   logoutbutton.addEventListener('click', function (event) {self.logout();});
   domNode.appendChild(logoutbutton);
 
-	let guest = false;
+  let guest = false;
   if (this.guestLogin === 'yes') {
     guest = this.document.createElement('input');
     guest.setAttribute('type', 'button');
@@ -111,37 +111,37 @@ Login.prototype.render = function(parent,nextSibling) {
     domNode.classList.add('loggedout');
   }
 
-	parent.insertBefore(domNode,nextSibling);
-	this.renderChildren(domNode,null);
-	this.domNodes.push(domNode);
+  parent.insertBefore(domNode,nextSibling);
+  this.renderChildren(domNode,null);
+  this.domNodes.push(domNode);
 };
 
 /*
 Compute the internal state of the widget
 */
 Login.prototype.execute = function() {
-	//Get widget attributes.
-	this.url = this.getAttribute('url', '/authenticate');
+  //Get widget attributes.
+  this.url = this.getAttribute('url', '/authenticate');
   this.saveCookie = this.getAttribute('saveCookie', 'yes');
-	this.cookieName = this.getAttribute('cookieName', 'token');
+  this.cookieName = this.getAttribute('cookieName', 'token');
   this.localstorageKey = this.getAttribute('localstorageKey', 'ws-token');
   this.guestLogin = this.getAttribute('guestLogin', 'no');
   this.bobLogin = this.getAttribute('bobLogin', 'true')
   this.token = localStorage.getItem(this.localstorageKey);
   this.name = undefined;
-	this.loggedin = false;
-	if (!this.previousCheck) {
-		this.previousCheck = Date.now()
-	}
+  this.loggedin = false;
+  if (!this.previousCheck) {
+    this.previousCheck = Date.now()
+  }
   if (this.token) {
     try {
       this.name = JSON.parse(window.atob(this.token.split('.')[1])).name;
       this.expires = JSON.parse(window.atob(this.token.split('.')[1])).exp;
-			if (this.expires*1000 > Date.now()) {
-				this.loggedin = true;
-				const self = this;
-				this.timeout = setTimeout(function(){self.refreshSelf()}, this.expires*1000 - Date.now() + 100);
-			}
+      if (this.expires*1000 > Date.now()) {
+        this.loggedin = true;
+        const self = this;
+        this.timeout = setTimeout(function(){self.refreshSelf()}, this.expires*1000 - Date.now() + 100);
+      }
     } catch (e) {
 
     }
@@ -175,15 +175,15 @@ Login.prototype.login = function() {
     xhr.onload = function () {
       // do something to response
       if (this.responseText && this.status == "200") {
-				const expires = new Date();
+        const expires = new Date();
         expires.setTime(expires.getTime() + 24*60*60*1000);
         localStorage.setItem(self.localstorageKey, this.responseText);
-				localStorage.setItem('token-eol', expires.getTime());
+        localStorage.setItem('token-eol', expires.getTime());
         self.token = this.responseText;
         self.expires = JSON.parse(window.atob(self.token.split('.')[1])).exp;
         if (self.saveCookie === 'yes' || self.saveCookie === true || self.saveCookie === 'true') {
           document.cookie = self.cookieName + '=' + this.responseText + '; expires=' + expires + '; path=/;'
-					document.cookie = 'token-eol' + '=' + expires.getTime() +'; path=/;'
+          document.cookie = 'token-eol' + '=' + expires.getTime() +'; path=/;'
         }
         self.setLoggedIn()
         // take care of the Bob login things, if they exist
@@ -191,15 +191,15 @@ Login.prototype.login = function() {
           this.bobLogin = '';
         }
         if ($tw.Bob && self.bobLogin.toLowerCase() === 'true') {
-					if (typeof $tw.Bob.getSettings === 'function') {
-						$tw.Bob.getSettings();
-					}
-					$tw.connections[0].socket.send(JSON.stringify({
-	          type: 'setLoggedIn',
-	          token: self.token,
-						heartbeat: true,
-	          wiki: $tw.wikiName
-	        }));
+          if (typeof $tw.Bob.getSettings === 'function') {
+            $tw.Bob.getSettings();
+          }
+          $tw.connections[0].socket.send(JSON.stringify({
+            type: 'setLoggedIn',
+            token: self.token,
+            heartbeat: true,
+            wiki: $tw.wikiName
+          }));
         }
       } else {
         self.setLoggedOut();
@@ -269,7 +269,7 @@ Login.prototype.getLoginState = function () {
 
 Login.prototype.setLoggedIn = function () {
   // $:/state/OokTech/Login -> true
-	this.loggedin = true;
+  this.loggedin = true;
   $tw.wiki.setText('$:/state/OokTech/Login', 'text', null, 'true');
   this.refreshSelf();
   console.log('Yay!!');
@@ -277,7 +277,7 @@ Login.prototype.setLoggedIn = function () {
 
 Login.prototype.setLoggedOut = function () {
   // $:/state/OokTech/Login -> false
-	this.loggedin = false;
+  this.loggedin = false;
   $tw.wiki.setText('$:/state/OokTech/Login', 'text', null, 'false');
   this.refreshSelf();
   console.log('Boo!');
@@ -289,9 +289,9 @@ Login.prototype.setLoggedOut = function () {
 Login.prototype.logout = function () {
   localStorage.removeItem(this.localstorageKey);
   document.cookie = this.cookieName + '=;expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
-	if ($tw.Bob && typeof $tw.Bob.getSettings === 'function') {
-		$tw.Bob.getSettings();
-	}
+  if ($tw.Bob && typeof $tw.Bob.getSettings === 'function') {
+    $tw.Bob.getSettings();
+  }
   this.setLoggedOut();
 }
 
@@ -299,13 +299,13 @@ Login.prototype.logout = function () {
 Refresh the widget by ensuring our attributes are up to date
 */
 Login.prototype.refresh = function(changedTiddlers) {
-	const changedAttributes = this.computeAttributes();
-	if(Object.keys(changedAttributes).length > 0 || (this.loggedin && ((this.expires * 1000 < Date.now()) || !this.expires)) || this.previousCheck + 1000 < Date.now()) {
-		this.previousCheck = Date.now();
-		this.refreshSelf();
-		return true;
-	}
-	return this.refreshChildren(changedTiddlers);
+  const changedAttributes = this.computeAttributes();
+  if(Object.keys(changedAttributes).length > 0 || (this.loggedin && ((this.expires * 1000 < Date.now()) || !this.expires)) || this.previousCheck + 1000 < Date.now()) {
+    this.previousCheck = Date.now();
+    this.refreshSelf();
+    return true;
+  }
+  return this.refreshChildren(changedTiddlers);
 };
 
 exports["login-widget"] = Login;

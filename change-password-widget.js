@@ -18,7 +18,7 @@ var widgets;
 var container;
 
 var ChangePassword = function(parseTreeNode,options) {
-	this.initialise(parseTreeNode,options);
+  this.initialise(parseTreeNode,options);
 };
 
 /*
@@ -30,13 +30,13 @@ ChangePassword.prototype = new Widget();
 Render this widget into the DOM
 */
 ChangePassword.prototype.render = function(parent,nextSibling) {
-	this.parentDomNode = parent;
-	this.computeAttributes();
-	this.execute();
+  this.parentDomNode = parent;
+  this.computeAttributes();
+  this.execute();
 
   var self = this;
 
-	var domNode = this.document.createElement("div");
+  var domNode = this.document.createElement("div");
   domNode.setAttribute('id', 'changepassworddiv')
   domNode.className='changepwdclass'
   var statusDiv = this.document.createElement('div')
@@ -52,36 +52,36 @@ ChangePassword.prototype.render = function(parent,nextSibling) {
   passNode.setAttribute('id', 'oldpwdtext');
   passSpan1.appendChild(passNode);
   passSpan1.setAttribute('id', 'oldpwd');
-	var passSpan2 = this.document.createElement('div');
+  var passSpan2 = this.document.createElement('div');
   passSpan2.appendChild(this.document.createTextNode('New Password:'));
-	var newPassNode1 = this.document.createElement("input");
+  var newPassNode1 = this.document.createElement("input");
   newPassNode1.setAttribute('type', 'password');
   newPassNode1.setAttribute('id', 'newpwdtext1');
   passSpan2.appendChild(newPassNode1);
   passSpan2.setAttribute('id', 'newpwd1');
-	var passSpan3 = this.document.createElement('div');
+  var passSpan3 = this.document.createElement('div');
   passSpan3.appendChild(this.document.createTextNode('New Password Again:'));
-	var newPassNode2 = this.document.createElement("input");
+  var newPassNode2 = this.document.createElement("input");
   newPassNode2.setAttribute('type', 'password');
   newPassNode2.setAttribute('id', 'newpwdtext2');
   passSpan3.appendChild(newPassNode2);
   passSpan3.setAttribute('id', 'newpwd2');
   domNode.appendChild(passSpan1);
-	domNode.appendChild(passSpan2);
-	domNode.appendChild(passSpan3);
-	if (this.requireConfirmation) {
-		var checkDiv = this.document.createElement('div');
-		checkDiv.setAttribute('id', 'checkdiv')
-		var confirmationCheckbox = this.document.createElement('input');
-		confirmationCheckbox.setAttribute('type','checkbox');
-		confirmationCheckbox.setAttribute('id','confirmCheck');
-		checkDiv.appendChild(confirmationCheckbox);
-		var checkLabel = this.document.createElement('label');
-		checkLabel.setAttribute('for', 'confirmCheck');
-		checkLabel.innerHTML = ' I do want to change my password';
-		checkDiv.appendChild(checkLabel);
-		domNode.appendChild(checkDiv);
-	}
+  domNode.appendChild(passSpan2);
+  domNode.appendChild(passSpan3);
+  if (this.requireConfirmation) {
+    var checkDiv = this.document.createElement('div');
+    checkDiv.setAttribute('id', 'checkdiv')
+    var confirmationCheckbox = this.document.createElement('input');
+    confirmationCheckbox.setAttribute('type','checkbox');
+    confirmationCheckbox.setAttribute('id','confirmCheck');
+    checkDiv.appendChild(confirmationCheckbox);
+    var checkLabel = this.document.createElement('label');
+    checkLabel.setAttribute('for', 'confirmCheck');
+    checkLabel.innerHTML = ' I do want to change my password';
+    checkDiv.appendChild(checkLabel);
+    domNode.appendChild(checkDiv);
+  }
   var changepasswordbutton = this.document.createElement('input');
   changepasswordbutton.setAttribute('type', 'button');
   changepasswordbutton.setAttribute('value', 'Change Password');
@@ -91,7 +91,7 @@ ChangePassword.prototype.render = function(parent,nextSibling) {
 
   var loginState = this.getLoginState();
   if (loginState) {
-		statusDiv.innerHTML =  'Logged In As' + this.name;
+    statusDiv.innerHTML =  'Logged In As ' + this.name;
     domNode.classList.add('loggedin');
     domNode.classList.remove('loggedout');
   } else {
@@ -100,32 +100,32 @@ ChangePassword.prototype.render = function(parent,nextSibling) {
     domNode.classList.add('loggedout');
   }
 
-	parent.insertBefore(domNode,nextSibling);
-	this.renderChildren(domNode,null);
-	this.domNodes.push(domNode);
+  parent.insertBefore(domNode,nextSibling);
+  this.renderChildren(domNode,null);
+  this.domNodes.push(domNode);
 };
 
 /*
 Compute the internal state of the widget
 */
 ChangePassword.prototype.execute = function() {
-	//Get widget attributes.
-	this.url = this.getAttribute('url', '/api/credentials/update/');
-	this.cookieName = this.getAttribute('cookieName', 'token');
+  //Get widget attributes.
+  this.url = this.getAttribute('url', '/api/credentials/update/');
+  this.cookieName = this.getAttribute('cookieName', 'token');
   this.localstorageKey = this.getAttribute('localstorageKey', 'ws-token');
-	this.requireConfirmation = this.getAttribute('requireConfirmation', true);
-	this.confirmationTiddler = this.getAttribute('confirmationTiddler', '$:/state/OokTech/Login/ChangePasswordConfirm');
+  this.requireConfirmation = this.getAttribute('requireConfirmation', true);
+  this.confirmationTiddler = this.getAttribute('confirmationTiddler', '$:/state/OokTech/Login/ChangePasswordConfirm');
   this.token = localStorage.getItem(this.localstorageKey);
   this.name = undefined;
-	this.loggedin = false
+  this.loggedin = false
   if (this.token) {
     try {
       this.name = JSON.parse(window.atob(this.token.split('.')[1])).name;
       this.expires = JSON.parse(window.atob(this.token.split('.')[1])).exp;
-			this.level = JSON.parse(window.atob(this.token.split('.')[1])).level;
-			if (this.expires*1000 > Date.now()) {
-				this.loggedin = true
-			}
+      this.level = JSON.parse(window.atob(this.token.split('.')[1])).level;
+      if (this.expires*1000 > Date.now()) {
+        this.loggedin = true
+      }
     } catch (e) {
 
     }
@@ -138,45 +138,45 @@ ChangePassword.prototype.execute = function() {
   localstorage
 */
 ChangePassword.prototype.changePassword = function() {
-	if ((!this.requireConfirmation || this.document.getElementById('confirmCheck').checked) && this.loggedin) {
-	  var self = this;
-		var newPassword = document.getElementById('newpwdtext1').value;
-		var newPassword2 = document.getElementById('newpwdtext2').value;
-		// Make sure that the two new password entry values match
-		if (newPassword === newPassword2) {
-		  // We can only do this if the destination is https. So either we are on an
-		  // https server and it is local (the url doesn't start with http) or we are
-		  // sending to an https url
-		  if ((window.location.protocol === 'https:' && (self.url.startsWith('https://') || !self.url.startsWith('http'))) || self.url.startsWith('https://')) {
-				if (self.name) {
-			    var xhr = new XMLHttpRequest();
-			    xhr.open('POST', self.url+self.name, true);
-			    xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
-			    xhr.onload = function () {
-			      // do something to response
-			      if (this.status == "200") {
-							// We need to parse the response text
-							// Remove the stored token
-			        localStorage.removeItem(self.localstorageKey);
-			        // Log out to make the person log in with the new password
-			        self.logout()
-			      } else {
-			        self.showError(this.status);
-			      }
-			    }
-			    var name = self.name;
-			    var password = document.getElementById('oldpwdtext').value;
-					var newPassword = document.getElementById('newpwdtext1').value;
-					var level = self.level;
-			    xhr.send(`name=${name}&pwd=${password}&new=${newPassword}&level=${level}`);
-				}
-		  }
-		}
-	}
+  if ((!this.requireConfirmation || this.document.getElementById('confirmCheck').checked) && this.loggedin) {
+    var self = this;
+    var newPassword = document.getElementById('newpwdtext1').value;
+    var newPassword2 = document.getElementById('newpwdtext2').value;
+    // Make sure that the two new password entry values match
+    if (newPassword === newPassword2) {
+      // We can only do this if the destination is https. So either we are on an
+      // https server and it is local (the url doesn't start with http) or we are
+      // sending to an https url
+      if ((window.location.protocol === 'https:' && (self.url.startsWith('https://') || !self.url.startsWith('http'))) || self.url.startsWith('https://')) {
+        if (self.name) {
+          var xhr = new XMLHttpRequest();
+          xhr.open('POST', self.url+self.name, true);
+          xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+          xhr.onload = function () {
+            // do something to response
+            if (this.status == "200") {
+              // We need to parse the response text
+              // Remove the stored token
+              localStorage.removeItem(self.localstorageKey);
+              // Log out to make the person log in with the new password
+              self.logout()
+            } else {
+              self.showError(this.status);
+            }
+          }
+          var name = self.name;
+          var password = document.getElementById('oldpwdtext').value;
+          var newPassword = document.getElementById('newpwdtext1').value;
+          var level = self.level;
+          xhr.send(`name=${name}&pwd=${password}&new=${newPassword}&level=${level}`);
+        }
+      }
+    }
+  }
 }
 
 ChangePassword.prototype.showError = function (code) {
-	console.log('Error, got code', code)
+  console.log('Error, got code', code)
 }
 
 ChangePassword.prototype.getLoginState = function () {
@@ -238,12 +238,12 @@ ChangePassword.prototype.logout = function () {
 Refresh the widget by ensuring our attributes are up to date
 */
 ChangePassword.prototype.refresh = function(changedTiddlers) {
-	var changedAttributes = this.computeAttributes();
-	if(Object.keys(changedAttributes).length > 0 || (this.expires > Date.now()) || !this.expires) {
-		this.refreshSelf();
-		return true;
-	}
-	return this.refreshChildren(changedTiddlers);
+  var changedAttributes = this.computeAttributes();
+  if(Object.keys(changedAttributes).length > 0 || (this.expires > Date.now()) || !this.expires) {
+    this.refreshSelf();
+    return true;
+  }
+  return this.refreshChildren(changedTiddlers);
 };
 
 exports["change-password-widget"] = ChangePassword;
