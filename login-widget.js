@@ -164,7 +164,7 @@ Login.prototype.loginGuest = function () {
   localstorage
 */
 Login.prototype.login = function() {
-  var self = this;
+  const self = this;
   // We can only do this if the destination is https. So either we are on an
   // https server and it is local (the url doesn't start with http) or we are
   // sending to an https url
@@ -211,22 +211,6 @@ Login.prototype.login = function() {
   }
 }
 
-function getCookie(c_name) {
-  var c_value = " " + document.cookie;
-  var c_start = c_value.indexOf(" " + c_name + "=");
-  if (c_start == -1) {
-    c_value = null;
-  } else {
-    c_start = c_value.indexOf("=", c_start) + 1;
-    var c_end = c_value.indexOf(";", c_start);
-    if (c_end == -1) {
-      c_end = c_value.length;
-    }
-    c_value = unescape(c_value.substring(c_start,c_end));
-  }
-  return c_value;
-}
-
 Login.prototype.getLoginState = function () {
   if (this.token) {
     if (this.expires * 1000 > Date.now()) {
@@ -238,13 +222,13 @@ Login.prototype.getLoginState = function () {
 }
 
 function getCookie(name) {
-  var value = " " + document.cookie;
-  var start = value.indexOf(" " + name + "=");
+  let value = " " + document.cookie;
+  let start = value.indexOf(" " + name + "=");
   if (start == -1) {
     value = null;
   } else {
     start = value.indexOf("=", start) + 1;
-    var end = value.indexOf(";", start);
+    let end = value.indexOf(";", start);
     if (end == -1) {
       end = value.length;
     }

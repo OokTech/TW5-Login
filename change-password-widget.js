@@ -13,11 +13,9 @@ A widget that creates a login interface for a restful server.
 /*global $tw: false */
 "use strict";
 
-var Widget = require("$:/core/modules/widgets/widget.js").widget;
-var widgets;
-var container;
+const Widget = require("$:/core/modules/widgets/widget.js").widget;
 
-var ChangePassword = function(parseTreeNode,options) {
+const ChangePassword = function(parseTreeNode,options) {
   this.initialise(parseTreeNode,options);
 };
 
@@ -34,34 +32,34 @@ ChangePassword.prototype.render = function(parent,nextSibling) {
   this.computeAttributes();
   this.execute();
 
-  var self = this;
+  const self = this;
 
-  var domNode = this.document.createElement("div");
+  const domNode = this.document.createElement("div");
   domNode.setAttribute('id', 'changepassworddiv')
   domNode.className='changepwdclass'
-  var statusDiv = this.document.createElement('div')
+  const statusDiv = this.document.createElement('div')
   statusDiv.setAttribute('id', 'statusdiv')
   domNode.appendChild(statusDiv)
-  var urlDiv = this.document.createElement('div')
+  const urlDiv = this.document.createElement('div')
   domNode.appendChild(urlDiv)
   urlDiv.innerHTML = 'on ' + this.url
-  var passSpan1 = this.document.createElement('div');
+  const passSpan1 = this.document.createElement('div');
   passSpan1.appendChild(this.document.createTextNode('Old Password:'));
-  var passNode = this.document.createElement("input");
+  const passNode = this.document.createElement("input");
   passNode.setAttribute('type', 'password');
   passNode.setAttribute('id', 'oldpwdtext');
   passSpan1.appendChild(passNode);
   passSpan1.setAttribute('id', 'oldpwd');
-  var passSpan2 = this.document.createElement('div');
+  const passSpan2 = this.document.createElement('div');
   passSpan2.appendChild(this.document.createTextNode('New Password:'));
-  var newPassNode1 = this.document.createElement("input");
+  const newPassNode1 = this.document.createElement("input");
   newPassNode1.setAttribute('type', 'password');
   newPassNode1.setAttribute('id', 'newpwdtext1');
   passSpan2.appendChild(newPassNode1);
   passSpan2.setAttribute('id', 'newpwd1');
-  var passSpan3 = this.document.createElement('div');
+  const passSpan3 = this.document.createElement('div');
   passSpan3.appendChild(this.document.createTextNode('New Password Again:'));
-  var newPassNode2 = this.document.createElement("input");
+  const newPassNode2 = this.document.createElement("input");
   newPassNode2.setAttribute('type', 'password');
   newPassNode2.setAttribute('id', 'newpwdtext2');
   passSpan3.appendChild(newPassNode2);
@@ -70,26 +68,26 @@ ChangePassword.prototype.render = function(parent,nextSibling) {
   domNode.appendChild(passSpan2);
   domNode.appendChild(passSpan3);
   if (this.requireConfirmation) {
-    var checkDiv = this.document.createElement('div');
+    const checkDiv = this.document.createElement('div');
     checkDiv.setAttribute('id', 'checkdiv')
-    var confirmationCheckbox = this.document.createElement('input');
+    const confirmationCheckbox = this.document.createElement('input');
     confirmationCheckbox.setAttribute('type','checkbox');
     confirmationCheckbox.setAttribute('id','confirmCheck');
     checkDiv.appendChild(confirmationCheckbox);
-    var checkLabel = this.document.createElement('label');
+    const checkLabel = this.document.createElement('label');
     checkLabel.setAttribute('for', 'confirmCheck');
     checkLabel.innerHTML = ' I do want to change my password';
     checkDiv.appendChild(checkLabel);
     domNode.appendChild(checkDiv);
   }
-  var changepasswordbutton = this.document.createElement('input');
+  const changepasswordbutton = this.document.createElement('input');
   changepasswordbutton.setAttribute('type', 'button');
   changepasswordbutton.setAttribute('value', 'Change Password');
   changepasswordbutton.setAttribute('id', 'changepasswordbutton');
   changepasswordbutton.addEventListener('click', function (event) {self.changePassword();});
   domNode.appendChild(changepasswordbutton);
 
-  var loginState = this.getLoginState();
+  const loginState = this.getLoginState();
   if (loginState) {
     statusDiv.innerHTML =  'Logged In As ' + this.name;
     domNode.classList.add('loggedin');
@@ -139,9 +137,9 @@ ChangePassword.prototype.execute = function() {
 */
 ChangePassword.prototype.changePassword = function() {
   if ((!this.requireConfirmation || this.document.getElementById('confirmCheck').checked) && this.loggedin) {
-    var self = this;
-    var newPassword = document.getElementById('newpwdtext1').value;
-    var newPassword2 = document.getElementById('newpwdtext2').value;
+    const self = this;
+    const newPassword = document.getElementById('newpwdtext1').value;
+    const newPassword2 = document.getElementById('newpwdtext2').value;
     // Make sure that the two new password entry values match
     if (newPassword === newPassword2) {
       // We can only do this if the destination is https. So either we are on an
@@ -149,7 +147,7 @@ ChangePassword.prototype.changePassword = function() {
       // sending to an https url
       if ((window.location.protocol === 'https:' && (self.url.startsWith('https://') || !self.url.startsWith('http'))) || self.url.startsWith('https://')) {
         if (self.name) {
-          var xhr = new XMLHttpRequest();
+          const xhr = new XMLHttpRequest();
           xhr.open('POST', self.url+self.name, true);
           xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
           xhr.onload = function () {
@@ -164,11 +162,8 @@ ChangePassword.prototype.changePassword = function() {
               self.showError(this.status);
             }
           }
-          var name = self.name;
-          var password = document.getElementById('oldpwdtext').value;
-          var newPassword = document.getElementById('newpwdtext1').value;
-          var level = self.level;
-          xhr.send(`name=${name}&pwd=${password}&new=${newPassword}&level=${level}`);
+          const password = document.getElementById('oldpwdtext').value;
+          xhr.send(`name=${self.name}&pwd=${password}&new=${newPassword}&level=${self.level}`);
         }
       }
     }
