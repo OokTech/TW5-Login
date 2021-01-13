@@ -87,7 +87,7 @@ Login.prototype.render = function(parent,nextSibling) {
 
   const loginState = this.getLoginState();
   if (loginState) {
-    $tw.wiki.setText('$:/state/OokTech/Login', 'text', null, 'true');
+    //$tw.wiki.setText('$:/state/OokTech/Login', 'text', null, 'true');
     if (this.guestLogin === 'yes') {
       guest.disabled = true;
     }
@@ -182,7 +182,7 @@ Login.prototype.login = function() {
         self.token = this.responseText;
         self.expires = JSON.parse(window.atob(self.token.split('.')[1])).exp;
         if (self.saveCookie === 'yes' || self.saveCookie === true || self.saveCookie === 'true') {
-          document.cookie = self.cookieName + '=' + this.responseText + '; expires=' + expires + '; path=/;'
+          document.cookie = self.cookieName + '=' + this.responseText + '; expires=' + expires + '; path=/; SameSite=Strict; Secure'
           document.cookie = 'token-eol' + '=' + expires.getTime() +'; path=/;'
         }
         self.setLoggedIn()
@@ -254,7 +254,7 @@ Login.prototype.getLoginState = function () {
 Login.prototype.setLoggedIn = function () {
   // $:/state/OokTech/Login -> true
   this.loggedin = true;
-  $tw.wiki.setText('$:/state/OokTech/Login', 'text', null, 'true');
+  //$tw.wiki.setText('$:/state/OokTech/Login', 'text', null, 'true');
   this.refreshSelf();
   console.log('Yay!!');
 }
@@ -262,7 +262,9 @@ Login.prototype.setLoggedIn = function () {
 Login.prototype.setLoggedOut = function () {
   // $:/state/OokTech/Login -> false
   this.loggedin = false;
-  $tw.wiki.setText('$:/state/OokTech/Login', 'text', null, 'false');
+  //$tw.wiki.setText('$:/state/OokTech/Login', 'text', null, 'false');
+  // Clear username and profile info
+  $tw.wiki.addTiddler(new $tw.Tiddler({title: '$:/status/UserName'}));
   this.refreshSelf();
   console.log('Boo!');
 }

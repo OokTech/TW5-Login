@@ -113,12 +113,15 @@ ChangePassword.prototype.execute = function() {
   this.localstorageKey = this.getAttribute('localstorageKey', 'ws-token');
   this.requireConfirmation = this.getAttribute('requireConfirmation', true);
   this.confirmationTiddler = this.getAttribute('confirmationTiddler', '$:/state/OokTech/Login/ChangePasswordConfirm');
+  this.autoLogin = this.getAttribute('autoLogin', 'yes');
+  this.loginUrl = this.getAttribute('loginUrl', '/authenticate');
   this.token = localStorage.getItem(this.localstorageKey);
   this.name = undefined;
   this.loggedin = false
   if (this.token) {
     try {
       this.name = JSON.parse(window.atob(this.token.split('.')[1])).name;
+      this.loggedInName = this.name;
       this.expires = JSON.parse(window.atob(this.token.split('.')[1])).exp;
       this.level = JSON.parse(window.atob(this.token.split('.')[1])).level;
       if (this.expires*1000 > Date.now()) {
@@ -157,7 +160,11 @@ ChangePassword.prototype.changePassword = function() {
               // Remove the stored token
               localStorage.removeItem(self.localstorageKey);
               // Log out to make the person log in with the new password
-              self.logout()
+              self.logout();
+              // now log back in automatically if set to do that
+              if(self.autoLogin === 'yes') {
+                self.login(self.loggedInName, newPassword)
+              }
             } else {
               self.showError(this.status);
             }
@@ -182,6 +189,42 @@ ChangePassword.prototype.getLoginState = function () {
       return "false";
     }
   }
+}
+
+ChangePassword.prototype.login = function(name, password) {
+  const self = this;
+  const xhr = new XMLHttpRequest();
+  xhr.open('POST', self.loginUrl, true);
+  xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+  xhr.onload = function () {
+    // do something to response
+    if (this.responseText && this.status == "200") {
+      const expires = new Date();
+      expires.setTime(expires.getTime() + 24*60*60*1000);
+      localStorage.setItem(self.localstorageKey, this.responseText);
+      localStorage.setItem('token-eol', expires.getTime());
+      self.token = this.responseText;
+      self.expires = JSON.parse(window.atob(self.token.split('.')[1])).exp;
+      document.cookie = self.cookieName + '=' + this.responseText + '; expires=' + expires + '; path=/; SameSite=Strict; Secure'
+      document.cookie = 'token-eol' + '=' + expires.getTime() +'; path=/;'
+      self.setLoggedIn()
+      // take care of the Bob login things, if they exist
+      if ($tw.Bob) {
+        if (typeof $tw.Bob.getSettings === 'function') {
+          $tw.Bob.getSettings();
+        }
+        $tw.connections[0].socket.send(JSON.stringify({
+          type: 'setLoggedIn',
+          token: self.token,
+          heartbeat: true,
+          wiki: $tw.wikiName
+        }));
+      }
+    } else {
+      self.setLoggedOut();
+    }
+  }
+  xhr.send(`name=${name}&pwd=${password}`);
 }
 
 function getCookie(c_name) {
@@ -217,6 +260,12 @@ ChangePassword.prototype.getLoginState = function () {
 ChangePassword.prototype.setLoggedOut = function () {
   // $:/state/OokTech/Login -> false
   $tw.wiki.setText('$:/state/OokTech/Login', 'text', null, 'false');
+  this.refreshSelf();
+}
+
+ChangePassword.prototype.setLoggedIn = function () {
+  // $:/state/OokTech/Login -> true
+  $tw.wiki.setText('$:/state/OokTech/Login', 'text', null, 'true');
   this.refreshSelf();
 }
 

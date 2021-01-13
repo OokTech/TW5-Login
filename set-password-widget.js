@@ -144,6 +144,9 @@ SetPassword.prototype.setPassword = function() {
       xhr.open('POST', self.url, true);
       xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
       xhr.onload = function () {
+        document.getElementById(self.user_id).value = '';
+        document.getElementById(self.pwd_id).value = '';
+        document.getElementById(self.cnfrm_id).value = '';
         // do something to response
         console.log('setPassword response', xhr.responseText)
         if (xhr.responseText === 'Success') {
@@ -154,20 +157,18 @@ SetPassword.prototype.setPassword = function() {
             xhr2.open('POST', '/authenticate', true);
             xhr2.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
             xhr2.onload = function () {
-              console.log(1)
               // do something to response
               if (xhr2.responseText && xhr2.status == "200") {
-                console.log(2)
+                const expires = new Date();
+                expires.setTime(expires.getTime() + 24*60*60*1000);
+                localStorage.setItem('token-eol', expires.getTime());
                 localStorage.setItem(self.localstorageKey, xhr2.responseText);
                 self.token = xhr2.responseText;
                 self.expires = JSON.parse(window.atob(self.token.split('.')[1])).exp;
-                const expires = new Date();
-                expires.setTime(expires.getTime() + 24*60*60*1000)
                 if (self.saveCookie !== 'no') {
-                  document.cookie = self.cookieName + '=' + this.responseText + '; expires=' + expires + '; path=/;'
+                  document.cookie = self.cookieName + '=' + this.responseText + '; expires=' + expires + '; path=/;  SameSite=Strict; Secure'
                   document.cookie = 'token-eol' + '=' + expires.getTime() +'; path=/;'
                 }
-                //self.setLoggedIn()
                 // take care of the Bob login things, if they exist
                 if (typeof self.bobLogin !== 'string') {
                   self.bobLogin = '';
@@ -195,6 +196,10 @@ SetPassword.prototype.setPassword = function() {
               }
             }
             xhr2.send(`name=${name}&pwd=${password}`);
+          } else {
+            if ($tw.Bob && typeof $tw.Bob.getSettings === 'function') {
+              $tw.Bob.getSettings();
+            }
           }
           if (typeof self.disableFlag === 'string') {
             // Set the text to 'disabled'
