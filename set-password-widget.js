@@ -145,8 +145,11 @@ SetPassword.prototype.setPassword = function() {
       xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
       xhr.onload = function () {
         // do something to response
-        console.log('setPassword response', xhr.responseText)
         if (xhr.responseText === 'Success') {
+          // on success clear the input fields
+          document.getElementById(self.user_id).value = '';
+          document.getElementById(self.pwd_id).value = '';
+          document.getElementById(self.cnfrm_id).value = '';
           // Handle success
           if (self.autologin === 'yes') {
             // If autologin is set than login as the new person
@@ -195,15 +198,22 @@ SetPassword.prototype.setPassword = function() {
               }
             }
             xhr2.send(`name=${name}&pwd=${password}`);
+          } else {
+            // update settings to make sure the wiki sees the new profiles
+            if (typeof $tw.Bob.getSettings === 'function') {
+              $tw.Bob.getSettings();
+            }
           }
           if (typeof self.disableFlag === 'string') {
             // Set the text to 'disabled'
             self.wiki.setText(self.disableFlag, 'text', undefined, 'disable')
             self.refreshSelf();
           }
+          alert('Added profile')
         } else {
           // Handle failure
           // Something?
+          alert('Failed to add profile')
         }
       }
       xhr.send(`name=${name}&pwd=${password}&lvl=${level}`);
